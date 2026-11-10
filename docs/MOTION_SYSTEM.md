@@ -437,3 +437,16 @@ Confettis génériques · boucles ou dérives sans cause · lancer gratuit · pa
 8. Dock : quels quatre onglets ? Faisceau ou simple lueur sur les petits écrans ? (T1.1, T3.5)
 9. Atmosphère personnelle : quel niveau de flou garantit qu'aucun détail n'est lisible ? (T6.3)
 10. Collisions entre galets : nécessaires après les tests M1 ? (fin M1, ADR-017)
+
+---
+
+## 15. Journal v0.3 — apprentissages vérifiés pendant T1.1 (2026-11-10)
+1. **L'impact se déclenche à l'arrivée visuelle, pas au repos du ressort.** Un ressort `flight` (bounce 0) n'atteint le repos qu'après ~0,9 s, alors que le galet est visuellement arrivé vers ~0,5 s. Le clic, le creux et le son arrivaient 0,4 s trop tard. Règle : `arrival()` (`spring.js`) déclenche l'impact quand la valeur est à moins de 0,5 % de la cible.
+2. **La trajectoire se bombe vers le centre de l'écran**, avec une marge de 44 px aux bords. Vérifié image par image : la version précédente sortait de l'écran par la gauche.
+3. **Le galet décolle de sa position réelle** (position du moteur), pas d'une position recalculée. Cela évite les sauts quand la carte est encore en mouvement.
+4. **Tone-mapping 3D : Neutral (Khronos PBR)** plutôt qu'AgX. AgX désaturait les teintes de marque des galets.
+5. **Plateau 3D le soir** : il faut une lumière d'ambiance plus forte, sinon les creux deviennent des « trous noirs » et ne lisent plus comme des empreintes.
+6. **Shaders précompilés** au montage (`renderer.compile`) : le pire frame de la 3D passe de 83–167 ms à 33 ms dans Chrome.
+7. **Three.js via CDN** : `three.module.min.js` importe le cœur **non minifié** (290 Ko gzip). On le redirige vers `three.core.min.js` dans l'import map (~194 Ko gzip au total).
+8. **Aucun élément flottant au-dessus d'une action** : le toast « Annuler » couvrait « Plus tard ». Il vit désormais dans la bande libre sous le plateau.
+9. **Une seule lumière**, vérifiée en matin, midi et soir sur les trois moteurs. Palette du jour proposée : « Air du matin » (ADR-019).

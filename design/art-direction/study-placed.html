@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#E9EEE8">
+  <link rel="icon" href="data:,">
+  <title>Placed — étude ROOMRESET</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,400..800&family=Figtree:wght@400..800&display=swap" media="print" onload="this.media='all'">
+  <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,400..800&family=Figtree:wght@400..800&display=swap"></noscript>
+  <link rel="stylesheet" href="css/rr.css">
+  <!-- three.module.min.js imports the UNMINIFIED ./three.core.js (290 KB gzip): remap it to the minified core (105 KB gzip). -->
+  <script type="importmap">{ "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.187.0/build/three.module.min.js",
+    "https://cdn.jsdelivr.net/npm/three@0.187.0/build/three.core.js": "https://cdn.jsdelivr.net/npm/three@0.187.0/build/three.core.min.js"
+  } }</script>
+  <style>
+    html, body { height: 100%; overflow: hidden; overscroll-behavior: none; }
+    .stage { position: fixed; inset: 0; overflow: hidden; }
+    .atmos { position: absolute; inset: 0; z-index: 0; background: var(--bg); }
+    .atmos canvas { position: absolute; inset: -4%; width: 108%; height: 108%; object-fit: cover; opacity: 0.55; }
+    [data-theme="evening"] .atmos canvas { opacity: 0.28; }
+    .atmos-light {
+      position: absolute; inset: 0; opacity: 0.1; will-change: opacity;
+      background: radial-gradient(120% 70% at calc(50% - var(--lx) * 45%) -10%, color-mix(in srgb, var(--light) 75%, transparent), transparent 70%);
+    }
+    .ui {
+      position: absolute; inset: 0; z-index: 2; max-width: 480px; margin: 0 auto; overflow: hidden;
+      display: grid; grid-template-rows: auto auto auto minmax(0, 1fr) auto; gap: 10px;
+      padding: calc(env(safe-area-inset-top) + 10px) var(--gutter) calc(env(safe-area-inset-bottom) + 14px);
+    }
+    .tools { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+    .seg { display: inline-flex; background: var(--card); border-radius: var(--r-pill); padding: 4px; box-shadow: 0 0 0 1px rgb(var(--shade) / 0.1); }
+    .seg button {
+      appearance: none; border: 0; background: transparent; min-height: 36px; padding: 0 12px; border-radius: var(--r-pill);
+      font: 600 14px/1 var(--font-ui); color: var(--text-2); cursor: pointer;
+    }
+    .seg button[aria-checked="true"] { background: var(--text); color: var(--bg); }
+    .daypart { display: inline-flex; gap: 4px; }
+    .tray-panel { padding: 14px 14px 14px; position: relative; overflow: hidden; }
+    .tray-head { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; margin: 0 4px 10px; }
+    .tray-head h1 { font: 650 20px/1.1 var(--font-display); margin: 0; }
+    .tray-head p { margin: 0; }
+    .tray {
+      --tray: color-mix(in srgb, var(--card) 90%, var(--ink) 7%);
+      background: var(--tray); border-radius: 18px; padding: 12px 10px; min-height: 86px;
+      display: flex; justify-content: space-between; align-items: center; gap: 6px;
+      box-shadow: inset 0 1px 2px rgb(var(--shade) / 0.12);
+    }
+    [data-theme="evening"] .tray { --tray: color-mix(in srgb, var(--card) 80%, #000 20%); }
+    [data-engine="gl"] .tray .imprint { visibility: hidden; }
+    .seal {
+      position: absolute; inset: 0; pointer-events: none; opacity: 0; transform: translateX(-100%);
+      background: linear-gradient(100deg, transparent 30%, color-mix(in srgb, var(--light) 55%, transparent) 50%, transparent 70%);
+    }
+    .note { margin: 0 4px; min-height: 20px; }
+    .now { display: grid; align-content: center; min-height: 0; }
+    .mission { padding: 18px 20px 20px; touch-action: pan-x; will-change: transform, opacity; }
+    .slot { width: 52px; height: 45px; margin: 2px 0 16px; }
+    .mission h2 { font: 650 27px/1.08 var(--font-display); letter-spacing: -0.01em; margin: 0 0 6px; }
+    .place { margin: 0 0 14px; color: var(--text-2); }
+    .chip {
+      display: inline-flex; align-items: center; height: 30px; padding: 0 12px; border-radius: var(--r-pill);
+      background: color-mix(in srgb, var(--light) 26%, var(--card)); font: 650 14px/1 var(--font-ui);
+      box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--light-ink) 40%, transparent);
+    }
+    .actions { display: grid; gap: 10px; margin-top: 18px; }
+    .hint { margin: 10px 2px 0; text-align: center; }
+    .later { display: flex; align-items: center; gap: 12px; min-height: 56px; padding: 0 6px; }
+    .later p { margin: 0; color: var(--text-2); font-weight: 600; font-size: 15px; white-space: nowrap; min-width: 108px; }
+    .later-row { flex: 1; height: 48px; border-radius: 16px; border: 1.5px dashed color-mix(in srgb, var(--edge) 70%, transparent); }
+    .layer, .gl { position: absolute; inset: 0; z-index: 3; pointer-events: none; }
+    .gl { width: 100%; height: 100%; display: none; }
+    [data-engine="gl"] .gl { display: block; }
+    .pebble.is-sprite { background: none; box-shadow: none; }
+    .pebble .sprite { position: absolute; inset: -7%; width: 114%; height: 114%; object-fit: contain; pointer-events: none; }
+    .pebble.is-sprite svg { position: relative; color: rgb(21 35 30 / 0.55); }
+    .band-row { position: relative; min-height: 44px; display: grid; align-items: center; }
+    .band-row > * { grid-area: 1 / 1; }
+    .undo {
+      position: relative; z-index: 5; justify-self: center;
+      display: flex; align-items: center; gap: 12px; padding: 4px 4px 4px 16px; border-radius: var(--r-pill);
+      background: var(--text); color: var(--bg); box-shadow: 0 10px 30px -12px rgb(var(--shade) / 0.5); font-size: 15px;
+      max-width: 100%;
+    }
+    .undo:not([hidden]) ~ .note, .band-row:has(.undo:not([hidden])) .note { visibility: hidden; }
+    .undo span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .undo button { background: color-mix(in srgb, var(--bg) 18%, transparent); color: var(--bg); border: 0; border-radius: var(--r-pill); min-height: 36px; padding: 0 14px; font-weight: 650; }
+    .receipt {
+      position: absolute; z-index: 6; left: var(--gutter); right: var(--gutter); bottom: calc(env(safe-area-inset-bottom) + 16px);
+      max-width: 440px; margin: 0 auto; padding: 20px;
+    }
+    .receipt h2 { font: 700 26px/1.1 var(--font-display); margin: 0 0 6px; }
+    .receipt .actions { margin-top: 16px; }
+    .stamp {
+      display: inline-block; margin-bottom: 10px; padding: 4px 10px; border-radius: 8px; transform: rotate(-4deg);
+      box-shadow: inset 0 0 0 2px var(--moss-ink); color: var(--moss-ink); font: 800 14px/1.2 var(--font-display); letter-spacing: 0.04em;
+    }
+    [data-theme="evening"] .stamp { color: var(--placed); box-shadow: inset 0 0 0 2px var(--placed); }
+    a.btn { text-decoration: none; }
+    @media (max-height: 720px) {
+      .mission { padding: 14px 16px 16px; }
+      .mission h2 { font-size: 23px; }
+      .slot { margin-bottom: 10px; }
+      .actions { margin-top: 12px; gap: 8px; }
+      .actions .btn { min-height: 46px; }
+      .hint { display: none; }
+      .tray { min-height: 76px; padding: 8px; }
+    }
+  </style>
+</head>
+<body>
+  <main class="stage">
+    <div class="atmos" aria-hidden="true"><div class="atmos-light"></div></div>
+    <div class="ui">
+      <div class="tools" id="tools">
+        <div class="seg" role="radiogroup" aria-label="Moteur de rendu">
+          <button type="button" role="radio" data-engine-btn="css" aria-checked="true">CSS</button>
+          <button type="button" role="radio" data-engine-btn="sprite" aria-checked="false">Blender</button>
+          <button type="button" role="radio" data-engine-btn="gl" aria-checked="false">3D</button>
+        </div>
+        <div class="seg daypart" role="group" aria-label="Lumière">
+          <button type="button" data-daypart="morning" aria-label="Lumière du matin">☀︎</button>
+          <button type="button" data-daypart="evening" aria-label="Lumière du soir">☾</button>
+        </div>
+      </div>
+      <section class="tray-panel card" aria-labelledby="planTitle">
+        <div class="tray-head"><h1 id="planTitle">Reset de 10 minutes</h1><p class="muted small" id="progress">0 sur 5 missions placées</p></div>
+        <div class="tray" id="tray" role="list" aria-label="Plan : une empreinte par mission"></div>
+        <div class="seal" id="seal" aria-hidden="true"></div>
+      </section>
+      <div class="band-row"><p class="note muted small" id="engineNote"></p><div class="undo" id="undo" hidden><span id="undoText"></span><button type="button" id="undoBtn">Annuler</button></div></div>
+      <section class="now" aria-label="Mission en cours">
+        <article class="mission card" id="card">
+          <div class="slot" id="slot" aria-hidden="true"></div>
+          <h2 id="missionTitle">Rassembler la vaisselle</h2>
+          <p class="place" id="missionPlace">Bureau et table de nuit</p>
+          <span class="chip" id="missionTime">2 min</span>
+          <div class="actions">
+            <button class="btn btn-primary btn-block" id="doneBtn" type="button">Fait</button>
+            <button class="btn btn-quiet btn-block" id="laterBtn" type="button">Plus tard</button>
+          </div>
+          <p class="hint muted small">Ou glissez la carte : vers le haut quand c’est fait, vers le bas pour plus tard.</p>
+        </article>
+      </section>
+      <div class="later"><p id="laterCount">Plus tard</p><div class="later-row" id="laterRow" role="list"></div></div>
+    </div>
+    <div class="layer" id="layer" aria-hidden="true"></div>
+    <canvas class="gl" id="gl" aria-hidden="true"></canvas>
+    <section class="receipt card" id="receipt" hidden aria-labelledby="receiptTitle">
+      <span class="stamp" aria-hidden="true">RESET ✓</span>
+      <h2 id="receiptTitle">Reset terminé</h2>
+      <p id="receiptText" class="muted"></p>
+      <div class="actions">
+        <a class="btn btn-primary btn-block" href="study-reveal.html">Voir l’avant et l’après</a>
+        <button class="btn btn-quiet btn-block" id="replay" type="button">Rejouer l’étude</button>
+      </div>
+    </section>
+  </main>
+  <script type="module" src="js/placed.js"></script>
+</body>
+</html>

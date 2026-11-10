@@ -5,84 +5,107 @@
 ## 1. État courant
 | | |
 |---|---|
-| **Dernière mise à jour** | 2026-11-10 |
-| **Dernière étape terminée** | **T0.1** — Discovery, audit des outils créatifs, mémoire persistante (🔍 livrée, en attente de revue du fondateur) |
-| **Étape en cours** | Aucune : **en attente de validation, commit et push par le fondateur** |
-| **Prochaine tâche** | **T1.1** — Planche de direction artistique et étude de mouvement interactive (*Light Dock*, *Placed* et empreintes, *Sunrise Reveal*). **Non commencée.** |
+| **Dernière mise à jour** | 2026-11-10, ~20 h 50 |
+| **Dernière étape livrée** | **T1.1** — Planche de direction artistique et étude de mouvement interactive (🔍 en revue). T0.1 a été validée et commitée par le fondateur. |
+| **Étape en cours** | Aucune : **en attente du test sur iPhone 13 et des choix du fondateur** (moteur, palette, forme) |
+| **Prochaine tâche** | **T2.1** — Spike IA : schéma, consignes et harnais (chemin critique ★ ; demande votre clé API et un budget). Alternative : T1.2, voix de marque. **Non commencée.** |
 
-## 2. Fichiers créés pendant T0.1
-- `CLAUDE.md` — instructions permanentes du projet et procédure de reprise.
-- `docs/PRODUCT_VISION.md` — vision, personas, valeur, modèle économique, hypothèses, jalons.
-- `docs/ROADMAP.md` — 13 phases (P0–P12), tâches avec ID stables, dépendances, critères, statuts, estimation.
-- `docs/MOTION_SYSTEM.md` — **v0.2** : direction artistique « Morning Clarity », analyse et **transformation** de toutes les références, revue critique intégrée, tokens, signatures, performance, accessibilité.
-- `docs/DECISIONS.md` — ADR-001 à ADR-017.
-- `docs/QA_CHECKLIST.md` — définition de « terminé » et exigences vérifiables par domaine.
-- `docs/TOOL_AUDIT.md` — état vérifié des outils, MCP, skills et agents.
-- `references/README.md` — inventaire des médias de référence (exclus de Git).
-- `.gitignore` — exclut les dépendances, les secrets, `references/*` (sauf le README), les photos privées et `.claude/settings.local.json`.
+## 2. Fichiers de T1.1
+**Nouveaux**
+- `design/art-direction/` (28 fichiers, 5,4 Mo, `.blend` compris) :
+  - `index.html` (planche) ; `study-placed.html`, `study-dock.html`, `study-reveal.html` ; `README.md` (test sur iPhone) ;
+  - `css/rr.css` ;
+  - `js/` : `spring`, `feel`, `perf`, `missions`, `blur`, `placed`, `placed-webgl`, `dock`, `reveal`, `board` ;
+  - `blender/build_sample_room.py`, `blender/build_pebble_sprites.py`, `blender/rr_sample_room_v001.blend` ;
+  - `assets/room-before.jpg`, `assets/room-after.jpg`, `assets/pebbles/*.webp`.
+- `docs/BRAND.md` (identité visuelle v1).
 
-Aucun fichier existant n'a été modifié. Les médias de `references/` sont intacts (lecture seule via FFmpeg).
+**Modifiés**
+- `docs/DECISIONS.md` (ADR-018 à 020) ;
+- `docs/ROADMAP.md` (statut de T1.1) ;
+- `docs/MOTION_SYSTEM.md` (§15, journal v0.3) ;
+- `docs/QA_CHECKLIST.md` (matrice d'appareils) ;
+- `docs/TOOL_AUDIT.md` (§11).
 
-## 3. Vérifications effectuées (preuves)
+**Déjà commités par le fondateur pendant la session** (`2b650e7`, 20:23) : `CLAUDE.md` (règles absolues, Motion non définitif) et `.gitignore` (rendus Blender ignorés).
+
+## 3. Vérifications de T1.1 (preuves)
 | Vérification | Résultat |
 |---|---|
-| `git status` | `fatal: not a git repository` : **le dossier n'est pas un dépôt** |
-| Machine, runtimes, CLI, apps | Voir TOOL_AUDIT §2–4 (commandes `--version`, `sysctl`, `system_profiler`) |
-| MCP Blender, LottieFiles, Computer Use, Supabase, Expo, Context7 | Appels réels ; résultats dans TOOL_AUDIT §6 (Blender et LottieFiles non connectés ; LottieFiles re-testé après l'ouverture de Chrome par le fondateur : toujours « No Creator tab is connected ») |
-| Références (5 vidéos, 5 images) | `ffprobe`, planches de 12 images, bandes image par image, énergie de mouvement (scores de scène FFmpeg) ; détails dans MOTION_SYSTEM §2 |
-| Versions npm et licences | `npm view` (2026-11-10) ; `LICENSE.md` de Remotion lue |
-| Doc Expo (Xcode requis) · doc Supabase (2 projets gratuits) · doc Motion (ressorts) · skill `claude-api` (modèles, tarifs, images) | Consultées ; citées dans les ADR |
-| Contrastes de la palette v0 | Calculés (script Python, formule WCAG) : texte OK partout ; **aplats `sun` et `sage` sur `paper` < 3:1** ⇒ contrainte documentée |
-| Polices (Bricolage Grotesque, Figtree) | Disponibles sur l'API Google Fonts avec axes variables et latin-ext |
-| Capture Chrome headless | Fonctionne, mais **viewport réel de 500 px** au lieu de 390 ⇒ inadaptée au mobile |
-| Safari du simulateur iOS 17.2 | **Fonctionne avec l'app Simulator ouverte** (393×659 px CSS, DPR 3, accents FR OK) ; écran noir pendant plus de 5 min en headless. Environnement restauré ensuite (simulateur éteint, app fermée, serveur local arrêté) |
-| Revue critique `motion-director` | Faite sur la v0.1 ; **ses trois défauts et sa proposition ont été intégrés** (MOTION_SYSTEM §2.5, ADR-017) |
+| Console (Chrome, 4 pages, 3 moteurs, matin et soir) | **0 erreur, 0 avertissement**, après correction de 5 défauts trouvés par les tests |
+| Parcours *Placed* (Fait, swipe vers le haut, Plus tard) | « 2 sur 5 missions placées » dans les 3 moteurs (Playwright, toucher CDP) |
+| Safari iOS 17.2 (simulateur iPhone 15 Pro Max) | Moteur 3D fonctionnel ; parcours complet jusqu'au ticket « RESET ✓ » ; dock, reveal et planche rendus |
+| Mouvement réduit | Au repos 120 ms après « Fait » ; la progression s'applique |
+| 0 rAF au repos | Vérifié après chaque scénario, sur toutes les pages |
+| Temps de frame (Chrome headless, horloge plafonnée à 60 Hz) | p95 16,8 ms pour tous ; pire frame 33 ms (3D, après préchauffage des shaders) ; **indicatif seulement** |
+| Temps de frame (simulateur, GPU du Mac) | 3D : p95 18–21 ms, max 113 ms ; **non représentatif de l'iPhone 13** |
+| Vol image par image (screencast) | Trajectoire corrigée : elle sortait de l'écran ; elle se bombe désormais vers le centre |
+| Poids (gzip) | Base DOM ~19 Ko ; sprites 17,6 Ko ; 3D +4,7 Ko de moteur et ~194 Ko de Three.js (CDN minifié) |
+| Contrastes | Calculés en direct dans la planche ; le seul échec, la lumière seule (1,58:1), est traité par un bord |
+| Rendus Blender | Chambre avant/après (même caméra, même lumière) en 14 s ; 5 galets en 5 s |
+| Revue `motion-director` sur captures réelles | Voir §8 |
 
-**Non vérifié (honnêtement)** : aucune interface n'existe encore, donc aucune mesure de FPS, aucun test tactile, aucune mesure de coût IA. Les coûts IA sont **estimés** à partir des tarifs publiés.
+**Non vérifié** : le ressenti et les mesures **sur l'iPhone 13** ; l'haptique iOS expérimentale ; le son sur appareil.
 
-## 4. Problèmes restants
-1. **Pas de dépôt Git** : le fondateur doit faire `git init` et le premier commit.
-2. **Blender MCP** et **LottieFiles Creator MCP** sont configurés mais non connectés (actions dans TOOL_AUDIT §9). Pas bloquant avant P8.
-3. **Supabase** : les deux créneaux gratuits sont occupés (décision ADR-008, avant T10.1).
-4. **Xcode 15.2** : pas de build natif Expo en local (P12, plus tard).
-5. **Claude in Chrome** n'est pas connecté à la session : la QA navigateur passera par Playwright (T3.1) et le simulateur.
-6. `@lottiefiles/creator-mcp@latest` n'est pas épinglé (risque de chaîne d'approvisionnement, à épingler si on l'utilise).
-7. Le fichier `roomreset-motion-reference.mp4` du brief n'existe pas (les références réelles sont inventoriées).
+## 4. Défauts trouvés par les tests et corrigés pendant T1.1
+1. **Chaque clic réinitialisait l'étude.** `setDaypart()` posait `data-daypart` sur `<html>`, qui recevait donc l'écouteur des boutons. Corrigé avec `data-rr-daypart` et des sélecteurs restreints aux boutons.
+2. `hidden` annulé par `display: flex` (toast, message du héros). Règle globale `[hidden] { display: none !important }`.
+3. Galet suivant placé 27 px trop bas (mesure pendant l'animation de la carte).
+4. Impact déclenché ~0,4 s après l'arrivée visuelle (attente du repos du ressort).
+5. Trajectoire sortant de l'écran.
+6. Toast « Annuler » qui recouvrait « Plus tard ».
+7. Avertissements WebGL `texImage3D` (`flipY` des textures canvas).
+8. Pics de 83–167 ms au premier vol 3D (shaders non précompilés).
+9. Three.js qui chargeait son cœur non minifié (290 Ko gzip).
+10. Images forcées à 1440 px de haut (attributs `width`/`height` sans `height: auto`).
+11. Plateau 3D trop sombre le soir.
+12. Polices Google bloquant le rendu (~25 s dans le simulateur).
+13. Schéma « Profondeur » invisible (transformations 3D CSS).
+14. Crash de Blender causé par mon script (itération pendant une mutation).
+15. Régression que j'ai introduite moi-même : guillemets échappés dans `onload` (erreur JS sur toutes les pages). Détectée par la dernière passe de tests, puis corrigée.
+16. Moteur 3D trop gourmand sous CPU ×4 (p95 33 ms). Ombre 1024², maillage du plateau à 3,2 px : p95 16,8 ms. Les mesures headless varient fortement d'une passe à l'autre (Mac chargé par le simulateur et Blender) : **non concluant pour départager les moteurs**.
 
 ## 5. Décisions à prendre par le fondateur
-| # | Décision | Recommandation | Quand |
-|---|---|---|---|
-| D1 | Valider la direction « Morning Clarity » v0.2 (ADR-015, 016, 017) | Valider le principe ; trancher les variantes sur preuve visuelle en T1.1 | Revue de T0.1 |
-| D2 | Valider le re-séquencement (ADR-014) et le périmètre M1 | Oui : spike IA tôt, boucle utile avant rétention | Revue de T0.1 |
-| D3 | Exclure `references/` de Git (ADR-013) | Oui (droits tiers, 45 Mo) | Avant le premier commit |
-| D4 | Budget pour le benchmark IA (T2.2) et choix final du modèle (Opus 5.5 par défaut ; Sonnet/Haiku à comparer ?) | Prévoir un petit budget de test (quelques dollars) ; décider sur mesures | Avant T2.2 |
-| D5 | Créneau Supabase (ADR-008 a, b ou c) | (c) local pour le développement, puis (a) ou (b) pour la préversion | Avant T10.1 |
-| D6 | Hébergement de la préversion M1 (ADR-012) | Comparer les CGU et les coûts en T7.5 | T7.5 |
-| D7 | Modèle de l'iPhone et version d'iOS pour les tests | — | Avant T1.1 |
+| # | Décision | Comment trancher |
+|---|---|---|
+| D8 | **Moteur des galets** : CSS, Blender ou 3D (ADR-018) | Jouer l'étude Placed sur l'iPhone 13 avec `?perf=1` ; envoyer les captures de l'encart |
+| D9 | **Palette du jour** : Air (proposée) ou Lin (ADR-019) | Bascule dans la planche |
+| D10 | Forme des galets : organique ou cercle | Section Matières de la planche |
+| D11 | Son activé par défaut ou proposé | Réglages de l'étude |
+| D4 à D7 | Inchangées (budget IA, Supabase, hébergement) | Voir l'historique T0.1 |
 
 ## 6. Travail reporté
-- T4.1 Moteur physique maison (⏸, ADR-017).
-- T12.1 Natif Expo (⏸, Xcode).
-- Offre Family, mascotte animée, monde 3D temps réel : hors MVP.
+- Captures dans `design/art-direction/captures/` : remplacées par des captures de QA produites en session et décrites ici, pour ne pas alourdir le dépôt. À produire si vous les voulez versionnées.
+- Mesures de référence sur iPhone 13 : nécessitent votre test.
+- T4.1 (moteur physique maison) et P12 (natif) : inchangés.
 
 ## 7. Statut Git
-Dossier **non initialisé** (`git status` ⇒ `fatal: not a git repository`). Claude n'a exécuté aucune commande Git d'écriture.
+- Branche `master`, **aucun remote configuré** (le push ne peut pas partir sans `git remote add origin …`).
+- Commits du fondateur : `8cbda3a` (T0.1) et `2b650e7` (20:23).
+- À commiter pour T1.1 : `design/` et `docs/`. Claude n'a exécuté aucune commande Git d'écriture.
 
-Commandes à exécuter **par le fondateur** :
-```sh
-cd /Users/aymaneamri/Desktop/TIdovo
-git init
-git status            # vérifier que references/*.MP4 et .PNG sont bien ignorés
-git add CLAUDE.md .gitignore docs references/README.md
-git commit -m "docs: bootstrap ROOMRESET project memory, tool audit and roadmap (T0.1)"
-```
+## 8. Revue critique `motion-director` (captures réelles de T1.1)
+Reçue. **Corrections à faire en début de prochaine session (elles terminent T1.1)** :
+1. **« Plus tard » laisse un trou dans le plateau.**
+   - Passer l'empreinte en `hidden` à la fin du ressort, puis animer les empreintes restantes et les galets placés vers leur nouvelle place (FLIP, `SPRING.settle`), y compris les puits WebGL.
+   - Compteur « x sur (N − plus tard) ».
+   - `.tray-head h1 { white-space: nowrap }`.
+2. **Le toast « Annuler » est trop fort.**
+   - Fond `var(--card)`, bouton en texte `--light-ink`, libellé court.
+   - L'annulation de « Plus tard » va dans la rangée `.later`.
+3. **Deux soleils** (sens du rai incohérent avec les ombres) : `--beam-skew = lx × 22deg` (matin positif, soir négatif) ; masque en dégradé statique sur `.cone`.
+4. **Un vrai impact** : `fly()` passe à une interpolation linéaire de 420 ms, une hauteur en `4τ(1−τ)` (vitesse maximale au contact), un trajet en ease-out et `onLand` au contact. La carte suivante arrive à `onLand − 60 ms` ; l'écrasement dépend de la taille.
+5. **Plateau 3D** : soleil neutre (pas beige) et liseré sombre des empreintes en couleurs de sommet (règle des 3:1).
+6. Détails :
+   - bord d'empreinte en `var(--ink-3)` ;
+   - Reveal recentré (`margin-inline: auto`) ;
+   - sprites Blender sans lumière directionnelle (albédo et AO) + reflet CSS piloté par `--lx` (moteur hybride).
+- Avis de l'agent sur le moteur : **DOM/CSS**, avec une texture Blender neutre ; l'effet extraordinaire viendra du timing de l'impact. **À confirmer par le test du fondateur sur iPhone 13.**
 
-## 8. Retours du fondateur pendant T0.1
-- « Chrome est ouvert » : LottieFiles re-testé (toujours non connecté) ; Claude in Chrome toujours non exposé à la session.
-- Nouvelle vidéo de référence (Glassy Navigation Tabs V5) : analysée (MOTION_SYSTEM §2.3).
-- « Pour toutes les références : pas un modèle à copier, inspiration, faire mieux, adapté au projet » : table de transformation (MOTION_SYSTEM §2.4), ADR-016, contrôle QA DES-08.
+**Demande design du fondateur (2026-11-10)** : « pas de simple couleur ; surtout un arrière-plan animé et des formes 3D floutées ». C'est la nouvelle tâche **T1.5** (ROADMAP), à faire après la clôture de T1.1. Elle prime sur le principe « rien ne bouge sans cause » pour le plan 0 (atmosphère). La table interactive reste calme.
 
 ## 9. Journal des étapes (ajout seulement)
 | Date | Tâche | Événement |
 |---|---|---|
-| 2026-11-10 | T0.1 | Audit (Git, machine, runtimes, apps, skills, agents, plugins, MCP), analyse des références (dont la nouvelle vidéo), vision, direction créative v0.1 puis v0.2 après la revue `motion-director`, roadmap P0–P12, ADR-001 à 017, QA, mémoire du projet. Livrée pour revue. **Arrêt : attente du fondateur.** |
+| 2026-11-10 | T0.1 | Audit, vision, direction v0.2, roadmap, ADR 001 à 017, mémoire du projet. Livrée, puis validée et commitée par le fondateur (`8cbda3a`). |
+| 2026-11-10 | T1.1 | Planche « Morning Clarity », 3 études, moteur *Placed* en 3 variantes (CSS, sprites Blender, Three.js), chambre et galets rendus dans Blender. Tests Chrome et Safari iOS ; 14 défauts trouvés et corrigés ; ADR 018 à 020. Livrée pour revue. **Arrêt : attente du test sur iPhone 13 et des choix du fondateur.** |

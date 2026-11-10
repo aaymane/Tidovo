@@ -181,3 +181,43 @@
   8. **Welcome** « Pose-le à sa place » : un galet, une empreinte, le geste central dès la première seconde.
 - **Alternatives** : garder le champ flottant (rejeté : proche d'Aura, moins utile) ; garder la raclette (rejeté : métaphore de jugement).
 - **Conséquences** : le chemin ★ de M1 passe d'environ 80 h à environ 75 h ; la question des collisions est rouverte en fin de M1 ; ADR-004, ADR-015 et ADR-016 sont amendées (leur texte d'origine est conservé).
+
+## ADR-018 — Interaction signature *Placed* : comparaison de trois moteurs à chorégraphie identique
+- **Date** : 2026-11-10 · **Statut** : Proposée (**choix final du fondateur après test au doigt sur iPhone 13**)
+- **Contexte** : le fondateur veut « une interaction réellement extraordinaire plutôt que dix ordinaires ». Motion est un point de départ, pas une décision définitive (CLAUDE.md §4). *Placed* est l'interaction la plus répétée du produit.
+- **Décision** : construire *Placed* avec trois moteurs interchangeables (`study-placed.html?engine=…`) partageant le contrôleur, les ressorts (formule de Motion), la trajectoire et les timings :
+  - **A — `css`** : galets DOM, matière procédurale CSS, guidée par la lumière globale ;
+  - **C — `sprite`** : galets DOM, matière satinée pré-rendue dans Blender ;
+  - **B — `gl`** : Three.js r187, galets 3D (`MeshPhysicalMaterial` avec sheen et clearcoat), plateau en heightfield qui **se creuse physiquement à l'impact**, ombres portées réelles, tone-mapping Neutral, rendu uniquement à la demande.
+- **Mesures du 2026-11-10** :
+
+  | Mesure | CSS | Sprite | 3D | Note |
+  |---|---|---|---|---|
+  | p95 du temps de frame (Chrome headless, émulation iPhone 13) | 16,8 ms | 16,8 ms | 16,8 ms | Horloge plafonnée à 60 Hz : non discriminant |
+  | Pire frame | 150 ms (pic isolé) | 33 ms | 33 ms | Pour la 3D, 83–167 ms **avant** le préchauffage des shaders |
+  | Simulateur iOS 17.2 (GPU du Mac) | — | — | p95 18–21 ms, max 113 ms | **Non représentatif** de l'iPhone |
+  | Zéro rAF au repos | Oui | Oui | Oui | |
+  | Poids (gzip) | ~19 Ko | + 17,6 Ko de sprites | + 4,7 Ko de moteur + **~194 Ko de Three.js** (CDN minifié) | Le prototype chargeait d'abord ~380 Ko (cœur non minifié) avant correction de l'import map |
+
+- **Lecture provisoire** :
+  - le moteur 3D est le seul à offrir une vraie profondeur (creux, ombre portée qui grandit avec la hauteur, plateau qui cède) ;
+  - son coût de téléchargement est ~10 fois supérieur, et un délai visible apparaît sur un réseau lent (mesuré dans le simulateur) ;
+  - CSS et sprites restent instantanés.
+- **Pistes** : 3D chargée en différé après la première peinture, avec le galet CSS en attendant ; ou 3D réservée aux moments forts (fin de session, monde) et CSS au quotidien. **À trancher sur preuve tactile**, avec `?perf=1` sur l'iPhone 13.
+- **Conséquences** : si la 3D est retenue, l'intégrer en P4 via npm (tree-shaking) et mesurer le poids réel du bundle ; garder la version CSS comme repli (palier `lite`, `prefers-reduced-motion`, échec WebGL : déjà géré par un repli automatique sur CSS).
+
+## ADR-019 — Palette du jour : proposition « Air du matin » (v0.3)
+- **Date** : 2026-11-10 · **Statut** : Proposée (choix du fondateur entre Air et Lin, comparables dans la planche)
+- **Contexte** : le skill `frontend-design` signale que « crème chaud + accent terracotta » est le cliché le plus courant des designs générés. La v0 (`#F5F0E8` + corail) en relevait.
+- **Décision proposée** : fond **`#E9EEE8`** (air vert-gris pâle), surface `#F7F9F5`, placé **mousse** `#5E8C6E` (3,28:1 en non-texte, contre 1,96:1 pour l'ancienne sauge), attention **baie** `#A8385A`, bords non textuels `#7C8982` (3,10:1). Tous les textes sont conformes AA (calculés).
+- **Alternatives** : garder Lin (v0), plus chaleureux mais générique.
+- **Conséquences** : MOTION_SYSTEM §3.1 et BRAND §2 seront mis à jour selon le choix.
+
+## ADR-020 — Outillage vérifié pendant T1.1
+- **Date** : 2026-11-10 · **Statut** : Acceptée
+- **Blender MCP** : fonctionne via une **instance dédiée** lancée avec l'add-on activé (`--python-expr addon_utils.enable('blender_mcp')`). L'instance ouverte par le fondateur n'avait pas l'add-on actif. Les rendus reproductibles passent par la **CLI en arrière-plan** (scripts versionnés). Un crash (segfault) a été causé par **mon** code : itération sur `all_objects` pendant une modification. C'est corrigé et commenté.
+- **Computer Use** : les clics fonctionnent, mais la **capture est impossible sous macOS 13** (« ScreenCaptureKit requires macOS 14.0 »). La vision passe par `screencapture`, avec les coordonnées en points 1:1 sur l'écran 1920×1080.
+- **Tests navigateur** : `playwright-core` 1.65 (dossier temporaire), avec le **Chrome installé** (`channel: 'chrome'`), émulation iPhone 13, toucher réel via CDP, mesures de frames et capture image par image. Il sera installé dans le projet en T3.1.
+- **Safari réel** : simulateur iPhone 15 Pro Max (iOS 17.2, WebKit) ouvert par le fondateur. Le parcours *Placed* complet a été vérifié jusqu'au ticket final.
+- **Réseau local** : servir sur `0.0.0.0` (pour l'iPhone) a été **refusé par le classifieur de sécurité**. Le fondateur lance lui-même cette commande (README du prototype).
+- **Comptes** : le fondateur dispose d'un **compte Apple Developer** et d'un **iPhone 13**. La voie native passera par EAS (builds cloud) et TestFlight (P12), malgré Xcode 15.2.

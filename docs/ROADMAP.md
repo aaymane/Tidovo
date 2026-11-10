@@ -61,21 +61,24 @@
 ## P1 — Brand & Art Direction
 
 #### T1.1 — Planche de direction artistique et étude de mouvement interactive
-`P0` · `L` · `M1★` · ⬜ · Dépend de : T0.1 validée
+`P0` · `L` · `M1★` · 🔍 En revue (livrée le 2026-11-10) · Dépend de : T0.1 validée
 - **Description** : un dossier autonome `design/art-direction/` (HTML, CSS et JS sans build ; Motion via CDN épinglé si nécessaire), servi en local et testable au téléphone. Il contient :
   1. **La planche** : palettes Jour et Soir avec les contrastes calculés dans la page ; spécimen Bricolage Grotesque et Figtree en EN/FR ; deux variantes de galet (superellipse irrégulière / cercle) avec leur matière et leur bord ; le modèle de profondeur à 3 plans ; les matières papier, vitre dépolie et verre clair ; des croquis du terrarium et de la luciole.
   2. **L'étude de mouvement interactive** (vraies interactions, pas une vidéo) :
      - (a) **Light Dock** : rai de soleil sur l'onglet actif, réglé sur l'angle de lumière global, avec traîne liée à la vitesse, balayage au pouce et galet Reset dans son berceau ;
      - (b) **Placed et empreintes** : sur l'axe vertical (plateau, carte, file), « Fait » fait voler le galet de la carte dans **son** empreinte, qui se creuse sous l'impact. Le même geste sert au Welcome « Pose-le à sa place » ;
      - (c) **Sunrise Reveal** sur deux photos d'exemple : focus pull, puis bande de lumière du matin qui traverse, uniquement en `transform`.
-- **Livrable** : `design/art-direction/` ; captures 393 px (Safari du simulateur iOS) et 1280 px dans `design/art-direction/captures/` ; extraction image par image des interactions ; `docs/BRAND.md` v1.
+- **Livrable** : `design/art-direction/` (planche, 3 études, moteur *Placed* en 3 variantes, README de test, scripts et `.blend` Blender) ; `docs/BRAND.md` v1. Captures de QA (Chrome et Safari iOS) et extraction image par image produites en session, hors dépôt.
 - **Critères d'acceptation**
-  - [ ] Texte ≥ 4,5:1 et éléments non textuels ≥ 3:1, table calculée affichée dans la page.
-  - [ ] Glyphes FR corrects dans les deux polices.
-  - [ ] Interactions (a), (b), (c) **fonctionnelles au toucher** sur l'iPhone du fondateur, avec retour écrit du fondateur ; p95 du temps de frame mesuré (overlay) et consigné.
-  - [ ] Variantes reduced-motion présentes et vérifiées.
-  - [ ] Revue critique `motion-director` faite, et son défaut principal corrigé.
-  - [ ] Le fondateur choisit les variantes ; ADR-015 et ADR-016 passent en « Acceptée » ou sont amendées.
+  - [x] Texte ≥ 4,5:1 et éléments non textuels ≥ 3:1, table calculée en direct dans la page. Le seul échec, la lumière seule (1,58:1), est signalé et traité par un bord obligatoire.
+  - [x] Glyphes FR corrects dans les deux polices (captures Chrome et Safari iOS) ; chiffres tabulaires alignés.
+  - [~] Interactions (a), (b), (c) **fonctionnelles au toucher** :
+    - vérifié dans Chrome (émulation iPhone 13, toucher CDP) ;
+    - vérifié dans Safari iOS 17.2 (simulateur, parcours *Placed* complet jusqu'au ticket) ;
+    - **reste : test sur l'iPhone 13 du fondateur, avec `?perf=1`**.
+  - [x] Variantes en mouvement réduit présentes et vérifiées (Playwright `reducedMotion`, moteur au repos à 120 ms).
+  - [ ] Revue critique `motion-director` sur captures réelles, et défaut principal corrigé (en cours, voir PROGRESS).
+  - [ ] Le fondateur choisit le moteur (ADR-018), la palette (ADR-019) et la forme ; ADR-015 et ADR-016 passent en « Acceptée » ou sont amendées.
 - **Outils** : skills `frontend-design`, `cinematic-ui`, `visual-qa` ; simulateur iOS ; FFmpeg pour l'analyse image par image.
 
 #### T1.2 — Voix de marque, microcopie EN/FR, nommage
@@ -97,6 +100,15 @@
 - **Critères** : [ ] sources citées et datées · [ ] 3 enseignements actionnables · [ ] prix vérifiés à la date.
 
 ---
+
+#### T1.5 — Atmosphère vivante : arrière-plan animé et formes 3D floutées
+`P0` · `M` · `M1★` · ⬜ · Dépend de : T1.1 (corrections de la revue appliquées)
+- **Description** : demande explicite du fondateur, « pas de simple couleur ». Le plan 0 devient un arrière-plan **animé, avec des galets et des orbes de lumière en 3D floutés** (profondeur de champ, lueurs, grain), qui dérivent lentement et réagissent au doigt ou à l'inclinaison.
+- **Comparaison** de deux approches, à disposition identique :
+  - (A) shader WebGL plein écran, en demi-résolution ;
+  - (B) sprites Blender floutés en CSS statique, animés en `transform`.
+- **Livrable** : `design/art-direction/study-atmosphere.html` (nouveaux fichiers uniquement), derrière un écran représentatif : carte de mission et dock.
+- **Critères** : [ ] lisibilité du texte ≥ 4,5:1 sur le pire cadre · [ ] pause hors écran, en arrière-plan et en mouvement réduit (image fixe) · [ ] p95 mesuré sur iPhone 13 · [ ] choix d'approche consigné (ADR) · [ ] validation du fondateur.
 
 ## P2 — Spike IA : valider la valeur avant de construire
 

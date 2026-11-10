@@ -149,3 +149,20 @@ xcodebuild -version && xcrun simctl list devices available | head
 npm view next version; npm view motion version
 ```
 Côté MCP : `mcp__blender__get_addon_status`, `mcp__lottiefiles-creator__list_scenes`, `mcp__plugin_supabase_supabase__list_projects`, `mcp__computer-use__list_granted_applications`.
+
+## 11. Mise à jour du 2026-11-10 (T1.1) — re-vérifiée par des appels réels
+| Outil | Statut | Preuve et détail |
+|---|---|---|
+| Blender MCP | ✅ via une **instance dédiée** | Votre Blender n'avait pas l'add-on activé (port 9876 fermé). Lancement de `Blender --python-expr "import addon_utils; addon_utils.enable('blender_mcp', default_set=True)"`, puis `get_addon_status` : add-on 1.8, protocole 15. Bibliothèques et générateurs payants désactivés |
+| Blender CLI (arrière-plan) | ✅ | Chambre avant/après en 14 s ; 5 galets en 5 s (Eevee Next, Intel 2017) |
+| Computer Use | ⚠️ clics oui, **captures non** | « ScreenCaptureKit requires macOS 14.0 ». Vision par `screencapture` (1920×1080, points 1:1). Clic réel vérifié dans le simulateur |
+| `screencapture` (macOS) | ✅ | Un seul écran actif, 1920×1080 |
+| LottieFiles Creator MCP | ⚠️ toujours non connecté | Re-testé au début de T1.1 : « No Creator tab is connected » |
+| Claude in Chrome | ❌ | Toujours aucun outil exposé |
+| Playwright | ✅ (`playwright-core` 1.65, dossier temporaire) | Chrome installé (`channel: 'chrome'`), émulation iPhone 13, toucher CDP, screencast image par image, `reducedMotion`, throttling CPU |
+| WebGL dans Chrome headless | ✅ | Le moteur Three.js tourne (`--use-angle=metal`) |
+| Simulateur iPhone 15 Pro Max (iOS 17.2) | ✅ | Ouvert par le fondateur. Safari et WebKit : étude Placed en moteur 3D complète jusqu'au ticket ; dock, reveal et planche capturés |
+| Serveur sur le réseau local (`0.0.0.0`) | ⛔ refusé par le classifieur de sécurité | Commande à lancer par le fondateur (`design/art-direction/README.md`) |
+| Compte Apple Developer, iPhone 13 | Déclarés par le fondateur | Voie native via EAS et TestFlight (P12) |
+
+**Enseignement réseau** : dans le simulateur, les polices Google et le CDN ont retardé le premier affichage d'environ 25 s (réseau lent). Les polices sont désormais chargées sans bloquer le rendu, et seront auto-hébergées en production (`next/font`).

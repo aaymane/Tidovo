@@ -1,0 +1,251 @@
+/* ROOMRESET — T1.1 art direction prototype. Shared tokens + components.
+   Proposal v0.3 "Morning Air" (default) with the v0 "Lin" palette kept as a variant
+   so the founder can compare. Only transform/opacity are animated by JS. */
+
+:root {
+  color-scheme: light;
+  /* Day — "Morning Air" */
+  --air: #E9EEE8;
+  --surface: #F7F9F5;
+  --ink: #15231E;
+  --ink-2: #4B5B54;
+  --ink-3: #6F7D76;
+  --edge: #7C8982;          /* non-text boundaries, >= 3:1 on --air (3.10:1) */
+  --sun: #F2B33D;           /* light, never a boundary on its own (1.58:1) */
+  --sun-ink: #8A5300;
+  --moss: #5E8C6E;          /* placed fill (3.28:1 on --air) */
+  --moss-ink: #2E6A4D;
+  --berry: #A8385A;         /* rare attention */
+
+  --bg: var(--air);
+  --card: var(--surface);
+  --text: var(--ink);
+  --text-2: var(--ink-2);
+  --text-3: var(--ink-3);
+  --light: var(--sun);
+  --light-ink: var(--sun-ink);
+  --placed: var(--moss);
+  --hollow: color-mix(in srgb, var(--ink) 7%, var(--bg));
+  --shade: 21 35 30;        /* rgb triplet of the ink, for shadows */
+
+  /* Light model: one global light. JS (feel.js) updates these from the time of day. */
+  --lx: 0.55;               /* shadow direction, x */
+  --ly: 0.85;               /* shadow direction, y */
+  --beam-skew: -12deg;
+
+  --font-display: "Bricolage Grotesque", ui-sans-serif, system-ui, sans-serif;
+  --font-ui: "Figtree", ui-sans-serif, system-ui, -apple-system, sans-serif;
+
+  --r-card: 24px;
+  --r-panel: 28px;
+  --r-pill: 999px;
+  --gutter: 20px;
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+[data-palette="lin"] {
+  --air: #F5F0E8;
+  --surface: #FFFCF7;
+  --berry: #A13F2A;
+}
+
+[data-theme="evening"] {
+  color-scheme: dark;
+  --bg: #0F1A16;
+  --card: #18261F;
+  --text: #F1EADF;
+  --text-2: #A8B4AD;
+  --text-3: #8C9993;
+  --edge: #6E7E76;
+  --light: #F5BE55;
+  --light-ink: #F5BE55;
+  --placed: #94C3A5;
+  --hollow: color-mix(in srgb, #000 28%, var(--bg));
+  --shade: 0 0 0;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font: 400 17px/1.45 var(--font-ui);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  min-height: 100dvh;
+}
+img { display: block; max-width: 100%; height: auto; } /* width/height attributes must not force a 1440px height */
+button { font: inherit; color: inherit; }
+:focus-visible { outline: 2.5px solid var(--light-ink); outline-offset: 3px; border-radius: 12px; }
+
+.display {
+  font-family: var(--font-display);
+  font-variation-settings: "wdth" 88, "opsz" 72;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.02;
+}
+.title { font-family: var(--font-display); font-weight: 650; letter-spacing: -0.01em; line-height: 1.12; }
+.muted { color: var(--text-2); }
+.small { font-size: 14px; line-height: 1.4; }
+.sr-only {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}
+
+/* ---------------------------------------------------------------- buttons */
+.btn {
+  appearance: none; border: 0; cursor: pointer;
+  min-height: 52px; padding: 0 22px; border-radius: var(--r-pill);
+  font: 600 17px/1 var(--font-ui);
+  display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+  touch-action: manipulation; user-select: none; -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  will-change: transform;
+}
+.btn-primary { background: var(--text); color: var(--bg); }
+.btn-quiet {
+  background: transparent; color: var(--text);
+  box-shadow: inset 0 0 0 1.5px var(--edge);
+}
+.btn-small { min-height: 44px; padding: 0 16px; font-size: 15px; }
+.btn-block { width: 100%; }
+
+/* ---------------------------------------------------------------- surfaces */
+.card {
+  background: var(--card);
+  border-radius: var(--r-card);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.55),
+    calc(var(--lx) * 3px) calc(var(--ly) * 5px) 14px -6px rgb(var(--shade) / 0.28),
+    0 0 0 1px rgb(var(--shade) / 0.06);
+}
+[data-theme="evening"] .card { box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.05), 0 10px 24px -10px rgb(0 0 0 / 0.6), 0 0 0 1px rgb(255 255 255 / 0.05); }
+
+/* ---------------------------------------------------------------- pebbles
+   Structure: .pebble-wrap (x/y/rotate) > .pebble-shadow (lift offset) + .pebble (body)
+   The organic shape is an 8-value border-radius (never clip-path). */
+.pebble-wrap {
+  position: absolute; left: 0; top: 0;
+  width: var(--size, 56px); height: calc(var(--size, 56px) * 0.86);
+  will-change: transform; touch-action: none;
+}
+.pebble-shadow {
+  position: absolute; inset: 6% 4% -4% 4%;
+  border-radius: var(--pr, 48% 52% 46% 54% / 52% 47% 53% 48%);
+  background: rgb(var(--shade) / 0.34);
+  filter: blur(5px);
+  transform: translate(calc(var(--lx) * 2px), calc(var(--ly) * 3px));
+  will-change: transform, opacity;
+}
+.pebble {
+  position: absolute; inset: 0;
+  display: grid; place-items: center;
+  border-radius: var(--pr, 48% 52% 46% 54% / 52% 47% 53% 48%);
+  background:
+    radial-gradient(110% 85% at calc(50% - var(--lx) * 26%) calc(42% - var(--ly) * 22%), rgb(255 255 255 / 0.78), rgb(255 255 255 / 0) 58%),
+    radial-gradient(130% 120% at 50% 45%, var(--tint, #D9DFD7), color-mix(in srgb, var(--tint, #D9DFD7) 74%, var(--ink)));
+  box-shadow:
+    inset 0 0 0 1.25px color-mix(in srgb, var(--edge) 90%, transparent),
+    inset calc(var(--lx) * -3px) calc(var(--ly) * -4px) 7px rgb(var(--shade) / 0.2);
+  color: color-mix(in srgb, var(--ink) 62%, var(--tint, #D9DFD7));
+  will-change: transform;
+}
+.pebble svg { width: 42%; height: 42%; }
+.pebble.is-circle, .pebble-shadow.is-circle, .imprint.is-circle { border-radius: 50%; }
+
+/* Label pill under a pebble: always visible, opaque, two lines, no separators. */
+.pebble-label {
+  position: absolute; left: 50%; top: calc(100% + 8px); transform: translateX(-50%);
+  background: var(--card); color: var(--text);
+  border-radius: 12px; padding: 5px 9px 6px; white-space: nowrap; text-align: center;
+  box-shadow: 0 0 0 1px rgb(var(--shade) / 0.1), 0 2px 6px -2px rgb(var(--shade) / 0.25);
+  font: 600 13px/1.15 var(--font-ui);
+}
+.pebble-label span { display: block; font-weight: 450; color: var(--text-2); font-size: 12px; }
+
+/* ---------------------------------------------------------------- imprints */
+.imprint {
+  position: relative;
+  width: var(--size, 56px); height: calc(var(--size, 56px) * 0.86);
+  border-radius: var(--pr, 48% 52% 46% 54% / 52% 47% 53% 48%);
+  background: var(--hollow);
+  box-shadow:
+    inset 0 0 0 1.5px var(--edge),
+    inset calc(var(--lx) * 3px) calc(var(--ly) * 4px) 7px rgb(var(--shade) / 0.3);
+  display: grid; place-items: center;
+  color: color-mix(in srgb, var(--text) 38%, transparent);
+}
+.imprint svg { width: 40%; height: 40%; }
+.imprint .dent {
+  position: absolute; inset: -18%;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgb(var(--shade) / 0) 52%, rgb(var(--shade) / 0.26) 72%, rgb(var(--shade) / 0) 100%);
+  opacity: 0; transform: scale(0.7);
+  pointer-events: none; will-change: transform, opacity;
+}
+.imprint .warm {
+  position: absolute; inset: -30%; border-radius: 50%;
+  background: radial-gradient(closest-side, color-mix(in srgb, var(--light) 70%, transparent), transparent 70%);
+  opacity: 0; pointer-events: none; will-change: opacity;
+}
+
+/* ---------------------------------------------------------------- sheet + toggles */
+.sheet-backdrop {
+  position: fixed; inset: 0; background: rgb(var(--shade) / 0.32); opacity: 0;
+  pointer-events: none; z-index: 40; will-change: opacity;
+}
+.sheet {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 41;
+  max-width: 520px; margin: 0 auto;
+  background: var(--card); color: var(--text);
+  border-radius: var(--r-panel) var(--r-panel) 0 0;
+  padding: 10px var(--gutter) calc(24px + env(safe-area-inset-bottom));
+  transform: translateY(105%); will-change: transform;
+  box-shadow: 0 -10px 40px -12px rgb(var(--shade) / 0.35);
+}
+.sheet .grabber { width: 40px; height: 5px; border-radius: 3px; background: var(--edge); opacity: 0.5; margin: 0 auto 14px; }
+.sheet h2 { font: 650 22px/1.2 var(--font-display); margin: 0 0 6px; }
+.toggle-row {
+  display: flex; align-items: center; justify-content: space-between; gap: 16px;
+  min-height: 56px; border-top: 1px solid rgb(var(--shade) / 0.1);
+}
+.toggle-row p { margin: 0; }
+.toggle-row small { display: block; color: var(--text-2); font-size: 13px; line-height: 1.3; }
+.switch {
+  appearance: none; -webkit-appearance: none; margin: 0; flex: none;
+  width: 52px; height: 32px; border-radius: 16px; position: relative; cursor: pointer;
+  background: color-mix(in srgb, var(--edge) 55%, var(--card));
+  box-shadow: inset 0 0 0 1.5px var(--edge);
+  transition: background-color 160ms var(--ease-out);
+}
+.switch::after {
+  content: ""; position: absolute; top: 3px; left: 3px; width: 26px; height: 26px; border-radius: 50%;
+  background: var(--card); box-shadow: 0 1px 3px rgb(var(--shade) / 0.35);
+  transition: transform 220ms var(--ease-out);
+}
+.switch:checked { background: var(--placed); }
+.switch:checked::after { transform: translateX(20px); }
+
+.icon-btn {
+  appearance: none; border: 0; background: var(--card); color: var(--text);
+  width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center; cursor: pointer;
+  box-shadow: 0 0 0 1px rgb(var(--shade) / 0.1), 0 3px 10px -4px rgb(var(--shade) / 0.3);
+}
+.icon-btn svg { width: 22px; height: 22px; }
+
+/* Perf overlay (only with ?perf=1) */
+.perf {
+  position: fixed; left: 8px; top: calc(8px + env(safe-area-inset-top)); z-index: 90;
+  background: rgb(15 26 22 / 0.86); color: #F1EADF; border-radius: 12px; padding: 8px 10px;
+  font: 500 12px/1.35 var(--font-ui); font-variant-numeric: tabular-nums; pointer-events: auto;
+  max-width: 230px;
+}
+.perf b { color: #F5BE55; font-weight: 650; }
+.perf button { margin-top: 6px; background: #2A3A33; border: 0; color: inherit; border-radius: 8px; padding: 6px 8px; font-size: 12px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .switch, .switch::after { transition: none; }
+}

@@ -1,0 +1,246 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#E9EEE8">
+  <link rel="icon" href="data:,">
+  <title>Morning Clarity — planche ROOMRESET</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,300..800&family=Figtree:ital,wght@0,400..800;1,400..600&display=swap" media="print" onload="this.media='all'">
+  <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,300..800&family=Figtree:ital,wght@0,400..800;1,400..600&display=swap"></noscript>
+  <link rel="stylesheet" href="css/rr.css">
+  <style>
+    .page { max-width: 720px; margin: 0 auto; padding: calc(env(safe-area-inset-top) + 12px) var(--gutter) calc(env(safe-area-inset-bottom) + 64px); }
+    .top { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+    .brand { font: 700 17px/1 var(--font-display); letter-spacing: -0.01em; }
+    section { margin-top: 64px; }
+    h2.title { font-size: clamp(28px, 7vw, 40px); margin: 0 0 8px; }
+    .lede { color: var(--text-2); margin: 0 0 22px; max-width: 58ch; }
+    .seg { display: inline-flex; background: var(--card); border-radius: var(--r-pill); padding: 4px; box-shadow: 0 0 0 1px rgb(var(--shade) / 0.1); }
+    .seg button { appearance: none; border: 0; background: transparent; min-height: 36px; padding: 0 14px; border-radius: var(--r-pill); font: 600 14px/1 var(--font-ui); color: var(--text-2); cursor: pointer; }
+    .seg button[aria-pressed="true"] { background: var(--text); color: var(--bg); }
+
+    /* Hero: the table, the sunbeam, one pebble and its imprint. */
+    .hero { margin-top: 28px; }
+    .hero h1 { font-size: clamp(46px, 14vw, 92px); margin: 0 0 14px; max-width: 9ch; }
+    .table {
+      position: relative; height: 300px; border-radius: 28px; overflow: hidden; touch-action: none;
+      background: color-mix(in srgb, var(--card) 70%, var(--bg));
+      box-shadow: inset 0 0 0 1px rgb(var(--shade) / 0.06);
+    }
+    .sunbeam {
+      position: absolute; inset: -20% -10%; pointer-events: none;
+      background: linear-gradient(calc(118deg + var(--lx) * -30deg), transparent 36%, color-mix(in srgb, var(--light) 22%, transparent) 44%, color-mix(in srgb, var(--light) 12%, transparent) 56%, transparent 64%);
+    }
+    .hero-tray { position: absolute; right: 7%; top: 50%; transform: translateY(-50%); padding: 14px 16px; border-radius: 22px; background: color-mix(in srgb, var(--card) 90%, var(--ink) 7%); box-shadow: inset 0 1px 2px rgb(var(--shade) / 0.12); }
+    #heroPebble { cursor: grab; }
+    #heroPebble:active { cursor: grabbing; }
+    .hero-actions { display: flex; align-items: center; gap: 12px; margin-top: 14px; min-height: 52px; }
+    .hero-actions p { margin: 0; color: var(--text-2); }
+    .hero-after:not([hidden]) { display: flex; align-items: center; gap: 12px; }
+
+    .studies { display: grid; gap: 12px; }
+    .study { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 14px; padding: 18px 18px 18px 20px; text-decoration: none; color: inherit; }
+    .study h3 { font: 650 21px/1.15 var(--font-display); margin: 0 0 4px; }
+    .study p { margin: 0; color: var(--text-2); font-size: 15px; }
+    .study .go { width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center; background: var(--text); color: var(--bg); }
+
+    .swatches { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 10px; margin-bottom: 18px; }
+    .swatch { padding: 12px; border-radius: 18px; background: var(--card); box-shadow: 0 0 0 1px rgb(var(--shade) / 0.08); font-size: 13px; }
+    .swatch i { display: block; height: 52px; border-radius: 12px; margin-bottom: 8px; box-shadow: inset 0 0 0 1px rgb(var(--shade) / 0.12); }
+    .swatch b { display: block; font-size: 14px; }
+    table { width: 100%; border-collapse: collapse; font-size: 14px; background: var(--card); border-radius: 18px; overflow: hidden; }
+    th, td { text-align: left; padding: 10px 12px; border-top: 1px solid rgb(var(--shade) / 0.08); vertical-align: middle; }
+    thead th { border-top: 0; color: var(--text-2); font-weight: 600; }
+    td { font-variant-numeric: tabular-nums; white-space: nowrap; }
+    td.ok { color: var(--moss-ink); font-weight: 650; }
+    td.ko { color: var(--berry); font-weight: 650; white-space: normal; }
+    [data-theme="evening"] td.ok { color: var(--placed); }
+    .sw { display: inline-block; width: 14px; height: 14px; border-radius: 50%; margin-right: 10px; vertical-align: -2px; }
+    .table-scroll { overflow-x: auto; border-radius: 18px; }
+
+    .specimen { padding: 22px; }
+    .specimen .big { font-size: clamp(40px, 11vw, 72px); margin: 0 0 18px; }
+    .specimen .mid { font: 650 26px/1.15 var(--font-display); margin: 0 0 12px; }
+    .specimen p { margin: 0 0 10px; max-width: 60ch; }
+    .digits { display: flex; gap: 24px; flex-wrap: wrap; margin-top: 14px; }
+    .digits div { font: 700 44px/1 var(--font-display); font-variant-numeric: tabular-nums; }
+    .digits div.ui { font: 600 44px/1 var(--font-ui); font-variant-numeric: tabular-nums; }
+    .digits span { display: block; font: 500 12px/1.3 var(--font-ui); color: var(--text-2); margin-top: 6px; }
+
+    .materials { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; }
+    .mat { position: relative; padding: 16px; min-height: 176px; display: grid; align-content: end; gap: 6px; }
+    .mat .stage { position: relative; height: 100px; display: grid; place-items: center; }
+    .mat .pebble-wrap { position: relative; transform: rotate(-8deg); }
+    .mat b { font-size: 15px; }
+    .mat small { color: var(--text-2); font-size: 13px; line-height: 1.3; }
+    .glass-demo { position: relative; height: 100px; border-radius: 16px; overflow: hidden; background: url(assets/room-after.jpg) 50% 70% / cover; }
+    .glass-demo .pane { position: absolute; left: 10px; right: 10px; bottom: 10px; height: 44px; border-radius: 16px; background: color-mix(in srgb, var(--card) 74%, transparent); -webkit-backdrop-filter: blur(14px) saturate(1.25); backdrop-filter: blur(14px) saturate(1.25); box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.75); display: grid; place-items: center; font-weight: 600; font-size: 13px; }
+
+    .planes { position: relative; height: 214px; }
+    .plane { position: absolute; left: 0; right: 0; height: 120px; border-radius: 22px; display: grid; align-content: start; padding: 12px 18px; font-weight: 650; font-size: 15px; }
+    .plane.p0 { top: 0; transform: scale(0.88); transform-origin: 50% 0; background: linear-gradient(120deg, color-mix(in srgb, var(--light) 34%, var(--bg)), color-mix(in srgb, var(--ink) 10%, var(--bg))); color: var(--text-2); }
+    .plane.p1 { top: 46px; transform: scale(0.94); transform-origin: 50% 0; background: color-mix(in srgb, var(--card) 72%, var(--bg)); box-shadow: 0 -1px 0 rgb(255 255 255 / 0.5) inset, 0 8px 18px -12px rgb(var(--shade) / 0.35); }
+    .plane.p2 { top: 92px; background: var(--card); box-shadow: 0 10px 24px -10px rgb(var(--shade) / 0.4), 0 0 0 1px rgb(var(--shade) / 0.06); }
+    .plane-legend { display: grid; gap: 8px; margin: 14px 0 0; padding: 0; list-style: none; }
+    .plane-legend li { display: grid; grid-template-columns: 110px 1fr; gap: 10px; font-size: 15px; }
+    .plane-legend b { font-weight: 650; }
+
+    .world { display: grid; grid-template-columns: minmax(0, 220px) 1fr; gap: 20px; align-items: center; }
+    @media (max-width: 520px) { .world { grid-template-columns: 1fr; } }
+    .world svg { width: 100%; height: auto; }
+    .pair { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .pair figure { margin: 0; }
+    .pair img { border-radius: 16px; aspect-ratio: 3 / 4; object-fit: cover; }
+    .pair figcaption { font-size: 13px; color: var(--text-2); margin-top: 6px; }
+    .decisions { display: grid; gap: 10px; padding: 0; margin: 0; list-style: none; }
+    .decisions li { padding: 16px 18px; }
+    .decisions b { display: block; font: 650 18px/1.2 var(--font-display); margin-bottom: 4px; }
+    .decisions span { color: var(--text-2); font-size: 15px; }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <div class="top" id="tools"><span class="brand">ROOMRESET</span></div>
+
+    <section class="hero" aria-labelledby="heroTitle">
+      <h1 class="display" id="heroTitle">Tout retrouve sa place.</h1>
+      <div class="table" id="table">
+        <div class="sunbeam" aria-hidden="true"></div>
+        <div class="hero-tray"><div class="imprint" id="heroImprint" style="--size:64px"><span class="dent"></span><span class="warm"></span>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 9h11v5a5 5 0 0 1-5 5h-1a5 5 0 0 1-5-5z"/><path d="M16 10h1.5a2.5 2.5 0 0 1 0 5H16"/></svg></div></div>
+        <div class="pebble-wrap" id="heroPebble" style="--size:64px;--tint:#EBCB86" aria-hidden="true">
+          <div class="pebble-shadow"></div>
+          <div class="pebble"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M5 9h11v5a5 5 0 0 1-5 5h-1a5 5 0 0 1-5-5z"/><path d="M16 10h1.5a2.5 2.5 0 0 1 0 5H16"/></svg></div>
+        </div>
+      </div>
+      <div class="hero-actions">
+        <button class="btn btn-primary" id="placeBtn" type="button">Placer le galet</button>
+        <div id="heroAfter" class="hero-after" hidden><p>Voilà le geste central de ROOMRESET.</p><button class="btn btn-quiet btn-small" id="resetHero" type="button">Recommencer</button></div>
+      </div>
+      <p class="muted small">Faites glisser le galet dans son empreinte, ou utilisez le bouton.</p>
+    </section>
+
+    <section aria-labelledby="studiesTitle">
+      <h2 class="title" id="studiesTitle">Trois études à tester au doigt</h2>
+      <p class="lede">Ouvrez-les sur votre iPhone. Ajoutez <code>?perf=1</code> à l’adresse pour afficher les mesures.</p>
+      <div class="studies">
+        <a class="study card" href="study-placed.html"><div><h3>Placed : trois moteurs comparés</h3><p>Le galet tombe dans sa propre empreinte. Même chorégraphie en CSS, en sprites Blender et en 3D réelle.</p></div><span class="go" aria-hidden="true">›</span></a>
+        <a class="study card" href="study-dock.html"><div><h3>Light Dock</h3><p>Un rai de soleil désigne l’onglet actif. Balayez au pouce, touchez le galet Reset.</p></div><span class="go" aria-hidden="true">›</span></a>
+        <a class="study card" href="study-reveal.html"><div><h3>Sunrise Reveal</h3><p>Mise au point sur l’après, puis la lumière du matin traverse la pièce.</p></div><span class="go" aria-hidden="true">›</span></a>
+      </div>
+    </section>
+
+    <section aria-labelledby="lightTitle">
+      <h2 class="title" id="lightTitle">Une seule lumière</h2>
+      <p class="lede">Les ombres des galets, le rai du dock et la lumière du Reveal suivent la même direction, qui change avec l’heure. Le soir, l’app passe en nuit verte éclairée par une lampe.</p>
+      <div class="seg" role="group" aria-label="Moment de la journée">
+        <button type="button" data-daypart="morning" aria-pressed="false">Matin</button>
+        <button type="button" data-daypart="noon" aria-pressed="false">Midi</button>
+        <button type="button" data-daypart="evening" aria-pressed="false">Soir</button>
+      </div>
+    </section>
+
+    <section aria-labelledby="colorTitle">
+      <h2 class="title" id="colorTitle">Couleur</h2>
+      <p class="lede">Proposition : <b>Air du matin</b>, un fond vert-gris pâle cohérent avec la nuit verte, au lieu du crème. Comparez avec la palette v0. Contrastes calculés en direct, formule WCAG 2.</p>
+      <div class="seg" role="group" aria-label="Palette" style="margin-bottom:16px">
+        <button type="button" data-palette-btn="air" aria-pressed="true">Air du matin</button>
+        <button type="button" data-palette-btn="lin" aria-pressed="false">Lin (v0)</button>
+      </div>
+      <div class="swatches">
+        <div class="swatch"><i style="background:var(--air)"></i><b>Air</b>fond</div>
+        <div class="swatch"><i style="background:var(--surface)"></i><b>Surface</b>cartes</div>
+        <div class="swatch"><i style="background:#15231E"></i><b>Encre de mousse</b>texte</div>
+        <div class="swatch"><i style="background:#F2B33D"></i><b>Soleil</b>lumière</div>
+        <div class="swatch"><i style="background:#5E8C6E"></i><b>Mousse</b>placé</div>
+        <div class="swatch"><i style="background:var(--berry)"></i><b>Baie</b>rare</div>
+        <div class="swatch"><i style="background:#0F1A16"></i><b>Nuit verte</b>soir</div>
+        <div class="swatch"><i style="background:#F5BE55"></i><b>Lampe</b>soir</div>
+      </div>
+      <div class="table-scroll"><table>
+        <caption class="sr-only">Contrastes de la palette <span id="paletteName"></span></caption>
+        <thead><tr><th scope="col">Couple</th><th scope="col">Mesuré</th><th scope="col">Requis</th><th scope="col">Verdict</th></tr></thead>
+        <tbody id="contrastBody"></tbody>
+      </table></div>
+    </section>
+
+    <section aria-labelledby="typeTitle">
+      <h2 class="title" id="typeTitle">Typographie</h2>
+      <div class="specimen card">
+        <p class="display big">Une chose à la fois.</p>
+        <p class="mid">Bricolage Grotesque, pour les titres et les chiffres qui comptent.</p>
+        <p>Figtree porte l’interface et le texte : lisible à 17 px, chaleureuse sans être enfantine. « Rangez la vaisselle, pliez le pull, ouvrez la fenêtre. » Été, île, cœur, garçon, à côté, déjà.</p>
+        <div class="digits" aria-label="Test des chiffres tabulaires">
+          <div>09:41<span>Bricolage, chiffres tabulaires</span></div>
+          <div>11:11<span>doivent s’aligner sur 09:41</span></div>
+          <div class="ui">04:58<span>Figtree, minuteur</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section aria-labelledby="matTitle">
+      <h2 class="title" id="matTitle">Matières</h2>
+      <p class="lede">Deux voies pour les galets, à comparer en mouvement dans l’étude Placed. Le CSS suit la lumière en direct ; Blender donne une vraie matière satinée, à lumière fixe.</p>
+      <div class="materials">
+        <div class="mat card"><div class="stage"><div class="pebble-wrap" style="--size:72px;--tint:#B9CFBF"><div class="pebble-shadow"></div><div class="pebble"></div></div></div><b>Galet CSS organique</b><small>Forme en border-radius à 8 valeurs.</small></div>
+        <div class="mat card"><div class="stage"><div class="pebble-wrap" style="--size:72px;--tint:#B9CFBF"><div class="pebble-shadow is-circle"></div><div class="pebble is-circle"></div></div></div><b>Galet CSS cercle</b><small>Plus neutre, moins « objet ».</small></div>
+        <div class="mat card"><div class="stage"><div class="pebble-wrap" style="--size:72px"><div class="pebble-shadow"></div><img src="assets/pebbles/pebble-clothes.webp" alt="" style="position:absolute;inset:-7%;width:114%;height:114%"></div></div><b>Galet Blender</b><small>Satin pré-rendu, 3,5 Ko par galet.</small></div>
+        <div class="mat card"><div class="stage"><div class="imprint" style="--size:72px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8.5 4 4 6.6l1.7 3.5L8 9.2V20h8V9.2l2.3.9L20 6.6 15.5 4a3.6 3.6 0 0 1-7 0z"/></svg></div></div><b>Empreinte</b><small>Creux, bord d’encre à 3,1:1, glyphe en creux.</small></div>
+        <div class="mat card"><div class="glass-demo"><div class="pane">Vitre dépolie</div></div><b>Vitre dépolie</b><small>Réservée au dock. Seul flou de l’app.</small></div>
+        <div class="mat card"><div class="stage" style="background:color-mix(in srgb,var(--card) 70%,var(--bg));border-radius:14px"></div><b>Papier</b><small>Cartes et feuilles, toujours opaques.</small></div>
+      </div>
+    </section>
+
+    <section aria-labelledby="depthTitle">
+      <h2 class="title" id="depthTitle">Profondeur</h2>
+      <div class="planes" aria-hidden="true"><div class="plane p0">Atmosphère</div><div class="plane p1">Table</div><div class="plane p2">Surface</div></div>
+      <ul class="plane-legend">
+        <li><b>Atmosphère</b><span>Votre pièce très floutée et la lumière qui monte. Jamais interactive.</span></li>
+        <li><b>Table</b><span>Les galets, vus de dessus. La hauteur se lit dans l’ombre, pas dans la taille.</span></li>
+        <li><b>Surface</b><span>Cartes, dock, boutons, texte. Rien n’y bouge sous le doigt sans raison.</span></li>
+      </ul>
+    </section>
+
+    <section aria-labelledby="worldTitle">
+      <h2 class="title" id="worldTitle">Le monde : un chemin qui pousse</h2>
+      <div class="world">
+        <svg viewBox="0 0 220 240" role="img" aria-label="Croquis du terrarium : un bocal de verre, un chemin de galets et une pousse, une luciole">
+          <defs><radialGradient id="ff" r="0.5"><stop offset="0" stop-color="#FFE7A8"/><stop offset="1" stop-color="#F5BE55" stop-opacity="0"/></radialGradient></defs>
+          <ellipse cx="110" cy="214" rx="82" ry="12" fill="rgb(21 35 30 / .12)"/>
+          <path d="M44 70c0-26 20-44 66-44s66 18 66 44v120c0 14-12 24-26 24H70c-14 0-26-10-26-24z" fill="color-mix(in srgb, #F7F9F5 40%, transparent)" stroke="#7C8982" stroke-width="2"/>
+          <path d="M48 168c18-8 40-10 62-8s44 6 62 0v22c0 12-10 22-22 22H70c-12 0-22-10-22-22z" fill="#8E7356" opacity=".85"/>
+          <g><ellipse cx="78" cy="178" rx="9" ry="6" fill="#EBCB86"/><ellipse cx="96" cy="171" rx="8" ry="5.5" fill="#B9CFBF"/><ellipse cx="114" cy="167" rx="9" ry="6" fill="#C3CFD9"/><ellipse cx="132" cy="166" rx="7.5" ry="5" fill="#E4DFD2"/><ellipse cx="149" cy="168" rx="8" ry="5.5" fill="#DDBF9C"/></g>
+          <path d="M158 166c0-20 4-34 14-44" stroke="#5A8A5D" stroke-width="3" fill="none" stroke-linecap="round"/>
+          <path d="M170 124c8-2 16 2 18 10-8 2-16-2-18-10zM164 142c-8-4-16-2-18 6 8 4 16 2 18-6z" fill="#5A8A5D"/>
+          <circle cx="72" cy="104" r="16" fill="url(#ff)"/><circle cx="72" cy="104" r="3" fill="#FFF3CF"/>
+          <path d="M60 52c-6 10-8 26-6 44" stroke="#fff" stroke-width="5" stroke-linecap="round" opacity=".6" fill="none"/>
+        </svg>
+        <p class="muted">Chaque Reset ajoute au bocal un tronçon de chemin, fait des galets que vous avez placés, et une pousse naît au bout. Rien ne meurt : en votre absence, le monde se repose, et la luciole vous accueille au retour.</p>
+      </div>
+    </section>
+
+    <section aria-labelledby="imgTitle">
+      <h2 class="title" id="imgTitle">Images d’exemple</h2>
+      <p class="lede">Une chambre originale, construite et rendue dans Blender. Même cadrage et même lumière dans les deux états : l’avant n’est jamais assombri.</p>
+      <div class="pair">
+        <figure><img src="assets/room-before.jpg" alt="Chambre en désordre : vêtements, livres et carton au sol" loading="lazy" width="1080" height="1440"><figcaption>Avant</figcaption></figure>
+        <figure><img src="assets/room-after.jpg" alt="La même chambre rangée, un rai de soleil sur le tapis" loading="lazy" width="1080" height="1440"><figcaption>Après</figcaption></figure>
+      </div>
+    </section>
+
+    <section aria-labelledby="decTitle">
+      <h2 class="title" id="decTitle">À vous de choisir</h2>
+      <ul class="decisions">
+        <li class="card"><b>Moteur des galets</b><span>CSS, Blender ou 3D : comparez dans l’étude Placed, au doigt et avec ?perf=1.</span></li>
+        <li class="card"><b>Palette du jour</b><span>Air du matin (proposé) ou Lin (v0).</span></li>
+        <li class="card"><b>Forme des galets</b><span>Organique ou cercle.</span></li>
+        <li class="card"><b>Son par défaut</b><span>Activé ou proposé à la première mission.</span></li>
+      </ul>
+    </section>
+  </main>
+  <script type="module" src="js/board.js"></script>
+</body>
+</html>

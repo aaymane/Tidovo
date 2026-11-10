@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#E9EEE8">
+  <link rel="icon" href="data:,">
+  <title>Light Dock — étude ROOMRESET</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,400..800&family=Figtree:wght@400..800&display=swap" media="print" onload="this.media='all'">
+  <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,400..800&family=Figtree:wght@400..800&display=swap"></noscript>
+  <link rel="stylesheet" href="css/rr.css">
+  <style>
+    .content { max-width: 480px; margin: 0 auto; padding: calc(env(safe-area-inset-top) + 12px) var(--gutter) calc(env(safe-area-inset-bottom) + 140px); }
+    .top { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-bottom: 26px; }
+    .seg { display: inline-flex; background: var(--card); border-radius: var(--r-pill); padding: 4px; box-shadow: 0 0 0 1px rgb(var(--shade) / 0.1); }
+    .seg button { appearance: none; border: 0; background: transparent; min-height: 36px; padding: 0 14px; border-radius: var(--r-pill); font: 600 14px/1 var(--font-ui); color: var(--text-2); cursor: pointer; }
+    .seg button[aria-pressed="true"] { background: var(--text); color: var(--bg); }
+    #tabBody { will-change: transform, opacity; }
+    #tabTitle { font-size: clamp(40px, 12vw, 56px); margin: 0 0 10px; }
+    #tabText { margin: 0 0 22px; color: var(--text-2); max-width: 32ch; }
+    .hero-card { overflow: hidden; margin-bottom: 16px; }
+    .hero-card img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; object-position: 50% 62%; }
+    .hero-card .body { padding: 16px 18px 18px; }
+    .hero-card h2 { font: 650 22px/1.15 var(--font-display); margin: 0 0 4px; }
+    .hero-card p { margin: 0 0 14px; color: var(--text-2); }
+    .filler { padding: 18px; margin-bottom: 14px; }
+    .filler h3 { font: 650 18px/1.2 var(--font-display); margin: 0 0 4px; }
+    .filler p { margin: 0; color: var(--text-2); }
+
+    .dock { position: fixed; z-index: 10; left: 0; right: 0; bottom: calc(env(safe-area-inset-bottom) + 12px); max-width: 448px; margin: 0 auto; padding: 0 16px; }
+    .dock-clip {
+      position: relative; height: 70px; border-radius: 26px; overflow: hidden; touch-action: none;
+      box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.75), 0 0 0 1px rgb(var(--shade) / 0.08), 0 14px 34px -14px rgb(var(--shade) / 0.45);
+    }
+    .glass {
+      position: absolute; inset: 0;
+      background: color-mix(in srgb, var(--card) 74%, transparent);
+      -webkit-backdrop-filter: blur(18px) saturate(1.25); backdrop-filter: blur(18px) saturate(1.25);
+    }
+    [data-theme="evening"] .glass { background: color-mix(in srgb, var(--card) 78%, transparent); }
+    [data-theme="evening"] .dock-clip { box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.08), 0 0 0 1px rgb(255 255 255 / 0.06), 0 14px 34px -14px rgb(0 0 0 / 0.8); }
+    .beam { position: absolute; top: 0; left: 0; width: 80px; height: 100%; pointer-events: none; will-change: transform; }
+    .cone {
+      position: absolute; inset: 0; transform-origin: 50% 0;
+      background: linear-gradient(to bottom, color-mix(in srgb, var(--light) 62%, transparent), color-mix(in srgb, var(--light) 0%, transparent) 92%);
+      clip-path: polygon(36% 0, 64% 0, 100% 100%, 0 100%);
+      will-change: transform;
+    }
+    .source {
+      position: absolute; top: 0; left: 0; width: 30px; height: 3px; border-radius: 0 0 3px 3px; pointer-events: none;
+      background: var(--light); box-shadow: 0 0 10px 2px color-mix(in srgb, var(--light) 70%, transparent); will-change: transform;
+    }
+    .tabs { position: relative; list-style: none; margin: 0; padding: 0 6px; height: 100%; display: grid; grid-template-columns: 1fr 1fr 84px 1fr 1fr; align-items: stretch; }
+    .tab {
+      appearance: none; border: 0; background: transparent; cursor: pointer; width: 100%; height: 100%;
+      display: grid; place-items: center; align-content: center; gap: 3px; color: var(--text-2);
+      font: 600 12px/1 var(--font-ui); -webkit-tap-highlight-color: transparent;
+    }
+    .tab svg { width: 24px; height: 24px; }
+    .tab-icon { will-change: transform; display: grid; }
+    .tab[aria-current="page"], .tab.is-hover { color: var(--light-ink); }
+    .tab:focus-visible { outline-offset: -6px; }
+    .reset-slot { pointer-events: none; }
+    .cradle { position: absolute; left: 50%; top: -1px; width: 104px; height: 18px; transform: translateX(-50%); pointer-events: none; overflow: visible; }
+    .cradle path { fill: rgb(var(--shade) / 0.14); }
+    .reset-pebble {
+      position: absolute; left: 50%; top: -22px; width: 64px; height: 56px; border: 0; cursor: pointer; padding: 0;
+      transform: translate(-50%, 0); will-change: transform; -webkit-tap-highlight-color: transparent;
+      border-radius: 49% 51% 46% 54% / 54% 47% 53% 46%;
+      background:
+        radial-gradient(110% 85% at calc(50% - var(--lx) * 26%) calc(40% - var(--ly) * 22%), rgb(255 255 255 / 0.7), rgb(255 255 255 / 0) 58%),
+        radial-gradient(130% 120% at 50% 45%, var(--light), color-mix(in srgb, var(--light) 70%, var(--sun-ink)));
+      box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--sun-ink) 70%, transparent),
+        inset calc(var(--lx) * -3px) calc(var(--ly) * -4px) 8px rgb(138 83 0 / 0.28),
+        calc(var(--lx) * 3px) calc(var(--ly) * 6px) 12px -3px rgb(var(--shade) / 0.45);
+      color: #15231E; display: grid; place-items: center;
+    }
+    .reset-pebble svg { width: 26px; height: 26px; }
+    .viewfinder { position: fixed; z-index: 30; inset: 0; background: #0F1A16; color: #F1EADF; transform-origin: 50% 50%; will-change: transform; overflow: hidden; }
+    .vf-inner { position: absolute; inset: 0; display: grid; grid-template-rows: auto 1fr auto; padding: calc(env(safe-area-inset-top) + 16px) 24px calc(env(safe-area-inset-bottom) + 24px); opacity: 0; }
+    .vf-frame { position: relative; margin: 18px 6px; }
+    .vf-frame i { position: absolute; width: 34px; height: 34px; border-color: #F5BE55; border-style: solid; }
+    .vf-frame i:nth-child(1) { left: 0; top: 0; border-width: 3px 0 0 3px; border-radius: 10px 0 0 0; }
+    .vf-frame i:nth-child(2) { right: 0; top: 0; border-width: 3px 3px 0 0; border-radius: 0 10px 0 0; }
+    .vf-frame i:nth-child(3) { left: 0; bottom: 0; border-width: 0 0 3px 3px; border-radius: 0 0 0 10px; }
+    .vf-frame i:nth-child(4) { right: 0; bottom: 0; border-width: 0 3px 3px 0; border-radius: 0 0 10px 0; }
+    .vf-bottom { display: grid; justify-items: center; gap: 16px; }
+    .shutter { width: 74px; height: 74px; border-radius: 50%; border: 4px solid #F1EADF; background: transparent; }
+    .vf-bottom .btn { background: #F1EADF; color: #0F1A16; }
+  </style>
+</head>
+<body>
+  <div class="content">
+    <div class="top" id="tools">
+      <div class="seg" role="group" aria-label="Moment de la journée">
+        <button type="button" data-daypart="morning" aria-pressed="false">Matin</button>
+        <button type="button" data-daypart="noon" aria-pressed="false">Midi</button>
+        <button type="button" data-daypart="evening" aria-pressed="false">Soir</button>
+      </div>
+    </div>
+    <div id="tabBody">
+      <h1 class="display" id="tabTitle">Accueil</h1>
+      <p id="tabText">Votre micro-reset du soir vous attend : trois surfaces, quatre minutes.</p>
+    </div>
+    <article class="card hero-card">
+      <img src="assets/room-after.jpg" alt="La chambre rangée, un rai de soleil sur le tapis" width="1080" height="1440">
+      <div class="body">
+        <h2>Micro-reset du soir</h2>
+        <p>Trois surfaces, environ quatre minutes.</p>
+        <button class="btn btn-primary" id="heroBtn" type="button">Commencer</button>
+      </div>
+    </article>
+    <article class="card filler"><h3>Faites défiler</h3><p>Le contenu passe sous le dock : sa vitre dépolie le floute, c’est le seul flou de l’app.</p></article>
+    <article class="card filler"><h3>Balayez le dock au pouce</h3><p>La lumière suit votre doigt d’un onglet à l’autre, puis se pose quand vous relâchez.</p></article>
+    <article class="card filler"><h3>Touchez le galet</h3><p>Il s’enfonce dans son berceau, puis s’ouvre en viseur.</p></article>
+  </div>
+
+  <nav class="dock" aria-label="Navigation principale">
+    <svg class="cradle" viewBox="0 0 104 18" preserveAspectRatio="none" aria-hidden="true"><path id="cradlePath" d="M0 0 C 20 0 26 10 52 10 S 84 0 104 0 Z"/></svg>
+    <div class="dock-clip" id="dockClip">
+      <div class="glass"></div>
+      <div class="beam" id="beam" aria-hidden="true"><div class="cone" id="cone"></div></div>
+      <div class="source" id="source" aria-hidden="true"></div>
+      <div class="tabs">
+        <button class="tab" type="button"><span class="tab-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 10.5 12 4l8 6.5V19a1 1 0 0 1-1 1h-4.5v-5.5h-5V20H5a1 1 0 0 1-1-1z"/></svg></span>Accueil</button>
+        <button class="tab" type="button"><span class="tab-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 20h12M12 20v-7"/><path d="M12 13c0-3.5 2.5-6 6-6 0 3.5-2.5 6-6 6zM12 15c0-3-2-5-5-5 0 3 2 5 5 5z"/></svg></span>Monde</button>
+        <span class="reset-slot" aria-hidden="true"></span>
+        <button class="tab" type="button"><span class="tab-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6 7 7M17 17l1.4 1.4M5.6 18.4 7 17M17 7l1.4-1.4"/></svg></span>Coach</button>
+        <button class="tab" type="button"><span class="tab-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 7h14M5 17h14"/><circle cx="9" cy="7" r="2.2"/><circle cx="15" cy="17" r="2.2"/></svg></span>Réglages</button>
+      </div>
+    </div>
+    <button class="reset-pebble" id="resetPebble" type="button" aria-label="Commencer un Reset : ouvrir l’appareil photo">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8.5A1.5 1.5 0 0 1 5.5 7h2l1.5-2h6l1.5 2h2A1.5 1.5 0 0 1 20 8.5v9a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 17.5z"/><circle cx="12" cy="13" r="3.5"/></svg>
+    </button>
+  </nav>
+
+  <div class="viewfinder" id="viewfinder" hidden role="dialog" aria-modal="true" aria-label="Viseur">
+    <div class="vf-inner" id="vfInner">
+      <p style="margin:0;text-align:center">Cadrez la pièce entière, sans personnes ni documents.</p>
+      <div class="vf-frame" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+      <div class="vf-bottom"><span class="shutter" aria-hidden="true"></span><button class="btn btn-small" id="vfClose" type="button">Fermer</button></div>
+    </div>
+  </div>
+  <script type="module" src="js/dock.js"></script>
+</body>
+</html>

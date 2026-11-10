@@ -145,3 +145,10 @@
 | Simulateur iPhone SE 3 / 15 Pro Max (iOS 17.2) | WebKit | Petit et grand écran | Présents, non testés |
 | Chrome 156 desktop (émulation mobile via Playwright) | Blink | E2E, traces, Lighthouse | Chrome présent ; Playwright à installer (T3.1) |
 | Android réel | Blink | Haptique, caméra | Non disponible à ce jour |
+
+### Mise à jour du 2026-11-10 (T1.1)
+| Appareil | Statut |
+|---|---|
+| **iPhone 13 du fondateur** (iOS à préciser) | **À tester** avec `?perf=1` : c'est la mesure de référence |
+| Simulateur iPhone 15 Pro Max (iOS 17.2, WebKit) | ✅ Testé : Placed en 3D complet jusqu'au ticket ; dock, reveal et planche rendus |
+| Chrome 156 (Playwright, émulation iPhone 13 390×844, tactile) | ✅ Testé : console propre sur les 4 pages ; parcours, mouvement réduit, 0 rAF au repos ; capture du vol image par image |
