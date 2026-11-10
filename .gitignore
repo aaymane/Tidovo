@@ -1,0 +1,35 @@
+# --- Dependencies & build outputs ---
+node_modules/
+.next/
+out/
+dist/
+build/
+coverage/
+playwright-report/
+test-results/
+blob-report/
+*.tsbuildinfo
+
+# --- Environment & secrets (never commit) ---
+.env
+.env.*
+!.env.example
+
+# --- OS / editors ---
+.DS_Store
+*.swp
+.idea/
+
+# --- Claude Code: personal local settings ---
+.claude/settings.local.json
+
+# --- Third-party reference media: local use only (not redistributable, ~45 MB) ---
+# See references/README.md and docs/DECISIONS.md (ADR-013). Remove these lines only if
+# you own the rights to these files and accept their size in Git history.
+references/*
+!references/README.md
+
+# --- Private photos (AI benchmark, user tests): never commit ---
+spikes/**/photos/
+spikes/**/results/raw/
+private/
