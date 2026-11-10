@@ -40,9 +40,17 @@ Communication avec le fondateur : **français**. Code, identifiants, noms de fic
 - Tâche visuelle : lancer l'app, capturer, tester les interactions, lire la console, mesurer quand c'est possible, corriger, puis seulement conclure. Voir `docs/QA_CHECKLIST.md`.
 - Captures mobiles : Playwright (viewport exact) ou Safari du simulateur iOS. La CLI headless de Chrome est **inadaptée** (viewport minimum mesuré à 500 px).
 
+### 3.1 Règles absolues du fondateur (2026-11-10)
+- Explorer plusieurs approches techniques si nécessaire : **Motion est le choix initial, pas une limite absolue.**
+- Exploiter les skills, MCP et agents créatifs **réellement disponibles** (vérifiés), lorsqu'ils apportent une amélioration tangible.
+- Pousser au meilleur niveau possible la direction artistique, les micro-interactions, les matières, les ombres, la profondeur, la typographie, les transitions et le ressenti tactile.
+- **Tester dans le navigateur et, si possible, sur mobile.** Un travail n'est jamais terminé simplement parce qu'il compile.
+- Performance, accessibilité et fluidité restent excellentes.
+- Les références sont une inspiration à transformer et à dépasser, jamais un modèle à copier.
+
 ## 4. Stack (justifications dans `docs/DECISIONS.md`)
 Next.js 16 (App Router) · React 19 · TypeScript strict · Tailwind CSS 4 · Motion (`motion/react`) · moteur physique 2D maison · Zod · next-intl (EN/FR) · Zustand + IndexedDB (local-first) · Claude API vision + sorties structurées (serveur uniquement) · Supabase (phase 10) · Stripe en mode test (phase 10) · Vitest · Playwright.
-Three.js, GSAP, Lottie ou Rive : interdits sans ADR qui démontre un gain mesuré.
+Motion est le **choix initial, pas définitif**. Pour toute interaction signature, comparer librement plusieurs approches (DOM/CSS, WebGL/Three.js, sprites Blender, GSAP, Lottie, Rive…) **à chorégraphie identique**, mesurer, puis retenir celle qui donne le meilleur résultat réel. Le choix est consigné dans une ADR. Une interaction extraordinaire vaut mieux que dix ordinaires.
 
 ## 5. Environnement (détails dans `docs/TOOL_AUDIT.md`)
 MacBook Pro 2017 Intel, macOS 13.7, Node 24, Xcode 15.2. Conséquence : pas de build iOS natif Expo en local (SDK 56–58 exigent Xcode 26.4+).

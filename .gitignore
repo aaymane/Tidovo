@@ -33,3 +33,6 @@ references/*
 spikes/**/photos/
 spikes/**/results/raw/
 private/
+
+# Blender PNG renders are reproducible from build_sample_room.py (web JPEGs are committed)
+design/art-direction/blender/renders/
