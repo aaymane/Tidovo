@@ -3,12 +3,12 @@
 //   sprite : DOM pebbles, Blender pre-rendered satin material
 //   gl     : WebGL (Three.js) pebbles + a tray that physically dents on impact
 // Choreography and timings are identical across engines so they can be compared fairly.
-import { Value, SPRING, VelocityTracker, clamp, lerp, onRender, arrival } from './spring.js';
+import { Value, SPRING, VelocityTracker, clamp, lerp, onRender, arrival, EASE } from './spring.js';
 import { prefs, buzz, tock, chord, announce, pressable, mountSettings, setDaypart, currentDaypart, motionReduced } from './feel.js';
 import { mountPerf, reset as resetPerf } from './perf.js';
 import { loadImage, blurredCanvas } from './blur.js';
 
-import { GLYPHS, glyphSvg, MISSIONS, pebbleSize, flightPoint, liftCurve, REST_ROT } from './missions.js';
+import { GLYPHS, glyphSvg, MISSIONS, pebbleSize, flightPoint, liftCurve, REST_ROT, FLIGHT_MS, squashFor } from './missions.js';
 export { GLYPHS, glyphSvg, MISSIONS, pebbleSize, flightPoint, liftCurve };
 
 // ------------------------------------------------------------------ DOM engine (css | sprite)
@@ -23,6 +23,7 @@ class DomEngine {
     const s = pebbleSize(m), wrap = document.createElement('div');
     wrap.className = 'pebble-wrap';
     wrap.style.setProperty('--size', s + 'px'); wrap.style.setProperty('--pr', m.pr); wrap.style.setProperty('--tint', m.tint);
+    wrap.style.setProperty('--sprite', `url(assets/pebbles/pebble-${m.id}.webp)`);
     const sprite = this.material === 'sprite' ? `<img class="sprite" alt="" draggable="false" src="assets/pebbles/pebble-${m.id}.webp">` : '';
     wrap.innerHTML = `<div class="pebble-shadow"></div><div class="pebble ${this.material === 'sprite' ? 'is-sprite' : ''}">${sprite}${glyphSvg(m.glyph)}</div>`;
     const it = {
@@ -54,16 +55,17 @@ class DomEngine {
   follow(m, p) { const it = this.item(m); it.x.jump(p.x); it.y.jump(p.y); }
   async fly(m, a, b, { onLand } = {}) {
     const it = this.item(m), t = new Value(0, 'ratio'), rot0 = it.rot.v;
-    it.lift.to(0.25, SPRING.lift);
-    const unsub = t.on((v) => {
-      const p = flightPoint(a, b, v);
-      it.x.jump(p.x); it.y.jump(p.y); it.lift.jump(Math.max(0, liftCurve(v)));
-      it.rot.jump(lerp(rot0, 0, Math.min(1, v * 1.2)));
+    const unsub = t.on((tau) => {
+      const p = flightPoint(a, b, EASE.out(tau));
+      it.x.jump(p.x); it.y.jump(p.y);
+      it.lift.jump(4 * tau * (1 - tau)); // parabola: fastest when it touches down
+      it.rot.jump(lerp(rot0, 0, EASE.out(Math.min(1, tau * 1.15))));
     });
-    await arrival(t, 1, SPRING.flight);
+    await t.tween(1, FLIGHT_MS, EASE.linear);
     unsub(); it.x.jump(b.x); it.y.jump(b.y); it.lift.jump(0); it.rot.jump(0);
     onLand?.();
-    it.sx.jump(1.05); it.sy.jump(0.94); it.sx.to(1, SPRING.snap); it.sy.to(1, SPRING.snap);
+    const k = squashFor(m);
+    it.sx.jump(1 + k); it.sy.jump(1 - k * 1.25); it.sx.to(1, SPRING.snap); it.sy.to(1, SPRING.snap);
   }
   impact(index) {
     const imp = document.querySelectorAll('.tray .imprint')[index];
@@ -85,7 +87,15 @@ class DomEngine {
     const imp = document.querySelectorAll('.tray .imprint')[index]; if (!imp) return;
     const s = new Value(open ? 0.2 : 1, 'ratio'), o = new Value(open ? 0 : 1, 'ratio');
     s.on((v) => { imp.style.transform = `scale(${v})`; }); o.on((v) => { imp.style.opacity = v; });
-    s.to(open ? 1 : 0.2, SPRING.settle); o.tween(open ? 1 : 0, open ? 180 : 260);
+    o.tween(open ? 1 : 0, open ? 180 : 260);
+    return s.to(open ? 1 : 0.2, SPRING.settle);
+  }
+  relayout(point, status) {
+    MISSIONS.forEach((m, k) => {
+      if (status[k] !== 'placed') return;
+      const it = this.item(m), p = point(k);
+      it.x.to(p.x, SPRING.settle); it.y.to(p.y, SPRING.settle);
+    });
   }
   async back(m, from, to) { // undo: lift out of the imprint (or later row) back to the card
     const it = this.item(m), t = new Value(0, 'ratio');
@@ -131,8 +141,8 @@ function fillCard(m) {
 }
 function placedCount() { return st.status.filter((s) => s === 'placed').length; }
 function updateProgress() {
-  const p = placedCount();
-  $('#progress').textContent = `${p} sur ${N} missions placées`;
+  const p = placedCount(), total = N - st.laterOrder.length;
+  $('#progress').innerHTML = `<b>${p}</b> sur ${total}<span class="sr-only"> missions placées</span>`;
   light.tween(0.1 + 0.11 * p, 700);
 }
 
@@ -160,9 +170,27 @@ function exitCard(dir, velocity = 0) {
 }
 
 let undoTimer = 0;
-function showUndo(text) {
-  const u = $('#undo'); $('#undoText').textContent = text; u.hidden = false;
+// Undo appears where the action went: under the plan for "Fait", in the later row for "Plus tard".
+function showUndo(text, where = 'top') {
+  const u = $('#undo'); $('#undoText').textContent = text;
+  (where === 'later' ? $('.later') : $('.band-row')).appendChild(u);
+  u.dataset.where = where; u.hidden = false;
   clearTimeout(undoTimer); undoTimer = setTimeout(() => { u.hidden = true; }, 5000);
+}
+const imprintEl = (i) => document.querySelectorAll('.tray .imprint')[i];
+// FLIP: when an imprint closes or reopens, the others slide to their new place and
+// placed pebbles (DOM or 3D wells) follow. Uses the independent `translate` property.
+function reflowTray(mutate) {
+  const imps = [...document.querySelectorAll('.tray .imprint')];
+  const before = imps.map((el) => (el.hidden ? null : el.getBoundingClientRect().left));
+  mutate();
+  const after = imps.map((el) => (el.hidden ? null : el.getBoundingClientRect().left));
+  imps.forEach((el, k) => {
+    if (before[k] == null || after[k] == null) return;
+    const dx = before[k] - after[k]; if (Math.abs(dx) < 0.5) return;
+    const v = new Value(dx); v.on((x) => { el.style.translate = `${x.toFixed(2)}px 0`; }); v.to(0, SPRING.settle);
+  });
+  engine.relayout?.((k) => imprintPoint(k), st.status);
 }
 
 function hideHint() { const h = $('.hint'); if (h) h.hidden = true; }
@@ -182,8 +210,9 @@ async function done(velocity = 0) {
     },
   });
   setTimeout(() => { st.busy = false; }, 150);
-  showUndo(`${m.title} placé`);
-  await new Promise((r) => setTimeout(r, motionReduced() ? 0 : 260));
+  showUndo('Placé.');
+  // The next card rises 60 ms before the contact, so the impact is the beat, not a wait.
+  await new Promise((r) => setTimeout(r, motionReduced() ? 0 : FLIGHT_MS - 60));
   if (g !== gen) return;
   const n = nextIndex(i + 1);
   if (n >= 0) { await prepareNext(n, g); } else { await flight; if (g === gen) finish(); }
@@ -196,11 +225,14 @@ async function later(velocity = 0) {
   const i = st.i, m = MISSIONS[i], g = gen;
   st.history.push({ type: 'later', i }); st.status[i] = 'later'; st.laterOrder.push(i);
   exitCard('down', velocity);
-  engine.closeImprint(i);
-  renderLater();
+  renderLater(); updateProgress();
   engine.toLater(m, laterPoint(st.laterOrder.length - 1));
+  engine.closeImprint(i).then(() => {
+    if (g !== gen || st.status[i] !== 'later') return;
+    reflowTray(() => { imprintEl(i).hidden = true; });
+  });
   setTimeout(() => { st.busy = false; }, 150);
-  showUndo(`${m.title} : pour plus tard`);
+  showUndo('Pour plus tard.', 'later');
   announce(`${m.title} : gardé pour plus tard, sans pénalité.`);
   const n = nextIndex(i + 1);
   if (n >= 0) await prepareNext(n, g); else if (g === gen) finish();
@@ -222,7 +254,10 @@ async function undo() {
   if (h.type === 'placed') { from = imprintPoint(h.i); engine.unfill(h.i); }
   else {
     from = laterPoint(st.laterOrder.indexOf(h.i));
-    st.laterOrder = st.laterOrder.filter((k) => k !== h.i); renderLater(); engine.closeImprint(h.i, true);
+    st.laterOrder = st.laterOrder.filter((k) => k !== h.i); renderLater();
+    st.status[h.i] = 'todo';
+    reflowTray(() => { imprintEl(h.i).hidden = false; });
+    engine.closeImprint(h.i, true);
   }
   st.status[h.i] = 'todo';
   await enterCard(h.i);
@@ -307,7 +342,7 @@ async function start(name) {
   st.i = 0; st.status = MISSIONS.map(() => 'todo'); st.laterOrder = []; st.history = []; st.busy = false;
   $('#receipt').hidden = true; $('#undo').hidden = true;
   buildTray(); renderLater(); updateProgress();
-  for (const imp of document.querySelectorAll('.tray .imprint')) { imp.style.opacity = ''; imp.style.transform = ''; }
+  for (const imp of document.querySelectorAll('.tray .imprint')) { imp.hidden = false; imp.style.opacity = ''; imp.style.transform = ''; imp.style.translate = ''; }
   if (name === 'gl') $('#engineNote').textContent = 'Chargement du moteur 3D…';
   engine = await makeEngine(name);
   try {

@@ -2,8 +2,8 @@
 // World units = CSS pixels: x right, y up (= -screen y), z toward the viewer. The plane z = 0
 // is the screen plane, so DOM rects map 1:1. Renders only when something changes.
 import * as THREE from 'three';
-import { Value, SPRING, onRender, lerp, arrival } from './spring.js';
-import { MISSIONS, GLYPHS, pebbleSize, flightPoint, liftCurve } from './missions.js';
+import { Value, SPRING, onRender, lerp, arrival, EASE } from './spring.js';
+import { MISSIONS, GLYPHS, pebbleSize, flightPoint, liftCurve, FLIGHT_MS, squashFor } from './missions.js';
 
 const REST_ROT = [-9, 7, -5, 10, -7];
 const WELL_DEPTH = 9;
@@ -54,7 +54,7 @@ export class GlEngine {
 
     // One global light, same direction as the CSS shadows (--lx, --ly).
     const lx = cssVar('--lx', 0.55), ly = cssVar('--ly', 0.85), evening = document.documentElement.dataset.theme === 'evening';
-    const sun = (this.sun = new THREE.DirectionalLight(evening ? 0xffc983 : 0xfff0d8, evening ? 2.1 : 2.6));
+    const sun = (this.sun = new THREE.DirectionalLight(evening ? 0xffc983 : 0xfffaf2, evening ? 2.1 : 2.5));
     sun.position.set(W / 2 - lx * 520, -H / 2 + ly * 520, 900);
     sun.target.position.set(W / 2, -H / 2, 0);
     sun.castShadow = true;
@@ -83,7 +83,8 @@ export class GlEngine {
     const geo = new THREE.PlaneGeometry(w, h, segX, segY);
     const color = cssColor(trayEl, 'backgroundColor', '#E2E8E0');
     if (document.documentElement.dataset.theme === 'evening') color.offsetHSL(0, 0, 0.06); // keep hollows readable at night
-    const mat = new THREE.MeshStandardMaterial({ color, roughness: 0.93, metalness: 0, alphaMap: roundedMask(w, h, 18), alphaTest: 0.5 });
+    const mat = new THREE.MeshStandardMaterial({ color, roughness: 0.93, metalness: 0, alphaMap: roundedMask(w, h, 18), alphaTest: 0.5, vertexColors: true });
+    geo.setAttribute('color', new THREE.Float32BufferAttribute(new Float32Array(geo.attributes.position.count * 3).fill(1), 3));
     const mesh = (this.tray = new THREE.Mesh(geo, mat));
     mesh.position.set(rect.left + w / 2, -(rect.top + h / 2), 0);
     mesh.receiveShadow = true; mesh.castShadow = true;
@@ -92,38 +93,52 @@ export class GlEngine {
     this.base = Float32Array.from(geo.attributes.position.array);
     this.wells = missions.map((m, i) => {
       const p = imprintPoint(i), s = pebbleSize(m);
-      return { x: p.x - (rect.left + w / 2), y: -(p.y - (rect.top + h / 2)), rx: (s / 2) * 1.06, ry: (s * 0.86 / 2) * 1.06, open: new Value(1, 'ratio') };
+      return { xv: new Value(p.x - (rect.left + w / 2)), y: -(p.y - (rect.top + h / 2)), rx: (s / 2) * 1.06, ry: (s * 0.86 / 2) * 1.06, open: new Value(1, 'ratio') };
     });
-    for (const well of this.wells) well.open.on(() => { this.trayDirty = true; this.dirty = true; });
+    for (const well of this.wells) for (const v of [well.open, well.xv]) v.on(() => { this.trayDirty = true; this.dirty = true; });
     this.dent = { x: 0, y: 0, sigma: 28, amp: new Value(0) };
     this.dent.amp.on(() => { this.trayDirty = true; this.dirty = true; });
     // Engraved glyphs at the bottom of each well.
     this.glyphs = missions.map((m, i) => {
       const s = pebbleSize(m) * 0.4, g = new THREE.Mesh(new THREE.PlaneGeometry(s, s),
         new THREE.MeshBasicMaterial({ map: glyphTexture(m.glyph, document.documentElement.dataset.theme === 'evening' ? '#F1EADF' : '#15231E'), transparent: true, opacity: 0.32, depthWrite: false }));
-      const wl = this.wells[i]; g.position.set(wl.x, wl.y, -WELL_DEPTH + 1.2); mesh.add(g); return g;
+      const wl = this.wells[i]; g.position.set(wl.xv.v, wl.y, -WELL_DEPTH + 1.2); mesh.add(g); return g;
     });
     this.updateTray();
   }
-  heightAt(x, y) {
-    let z = 0;
+  // Height of the tray surface and strength of the ink rim around each hollow.
+  sample(x, y) {
+    let z = 0, rim = 0;
     for (const wl of this.wells) {
       const o = wl.open.v; if (o <= 0.001) continue;
-      const nx = Math.abs(x - wl.x) / wl.rx, ny = Math.abs(y - wl.y) / wl.ry;
+      const nx = Math.abs(x - wl.xv.v) / wl.rx, ny = Math.abs(y - wl.y) / wl.ry;
       const s = Math.pow(Math.pow(nx, 2.6) + Math.pow(ny, 2.6), 1 / 2.6);
       const t = Math.min(1, Math.max(0, (s - 0.74) / (1.08 - 0.74)));
       z -= WELL_DEPTH * o * (1 - t * t * (3 - 2 * t));
+      rim = Math.max(rim, o * Math.exp(-(((s - 1.1) / 0.07) ** 2)));
     }
     const a = this.dent.amp.v;
     if (a) { const dx = x - this.dent.x, dy = y - this.dent.y; z += a * Math.exp(-(dx * dx + dy * dy) / (2 * this.dent.sigma ** 2)); }
-    return z;
+    return [z, rim];
   }
   updateTray() {
-    const pos = this.tray.geometry.attributes.position, b = this.base;
-    for (let i = 0; i < pos.count; i++) pos.array[i * 3 + 2] = this.heightAt(b[i * 3], b[i * 3 + 1]);
-    pos.needsUpdate = true; this.tray.geometry.computeVertexNormals();
-    this.glyphs?.forEach((g, i) => { const o = this.wells[i].open.v; g.material.opacity = 0.32 * o; g.position.z = -WELL_DEPTH * o + 1.2; });
+    const g = this.tray.geometry, pos = g.attributes.position, col = g.attributes.color, b = this.base;
+    for (let i = 0; i < pos.count; i++) {
+      const [z, rim] = this.sample(b[i * 3], b[i * 3 + 1]);
+      pos.array[i * 3 + 2] = z;
+      col.array[i * 3] = 1 - 0.58 * rim; col.array[i * 3 + 1] = 1 - 0.5 * rim; col.array[i * 3 + 2] = 1 - 0.55 * rim;
+    }
+    pos.needsUpdate = true; col.needsUpdate = true; g.computeVertexNormals();
+    this.glyphs?.forEach((gl, i) => { const wl = this.wells[i], o = wl.open.v; gl.material.opacity = 0.32 * o; gl.position.set(wl.xv.v, wl.y, -WELL_DEPTH * o + 1.2); });
     this.trayDirty = false;
+  }
+  relayout(point, status) {
+    const r = this.trayRect, cx = r.left + r.width / 2;
+    MISSIONS.forEach((m, k) => {
+      if (status[k] === 'later') return;
+      const p = point(k); this.wells[k].xv.to(p.x - cx, SPRING.settle);
+      if (status[k] === 'placed') this.item(m).x.to(p.x, SPRING.settle);
+    });
   }
 
   // ---------------------------------------------------------------- pebbles
@@ -175,18 +190,18 @@ export class GlEngine {
   follow(m, p) { const it = this.item(m); it.x.jump(p.x); it.y.jump(p.y); }
   async fly(m, a, b, { onLand } = {}) {
     const it = this.item(m), i = MISSIONS.indexOf(m), t = new Value(0, 'ratio'), rot0 = it.rot.v, z0 = it.z.v, z1 = this.wellZ(it);
-    const unsub = t.on((v) => {
-      const p = flightPoint(a, b, v);
-      it.x.jump(p.x); it.y.jump(p.y); it.lift.jump(liftCurve(v)); it.z.jump(lerp(z0, z1, v));
-      it.rot.jump(lerp(rot0, 0, Math.min(1, v * 1.2)));
+    const unsub = t.on((tau) => {
+      const e = EASE.out(tau), p = flightPoint(a, b, e);
+      it.x.jump(p.x); it.y.jump(p.y); it.lift.jump(4 * tau * (1 - tau)); it.z.jump(lerp(z0, z1, e));
+      it.rot.jump(lerp(rot0, 0, EASE.out(Math.min(1, tau * 1.15))));
     });
-    await arrival(t, 1, SPRING.flight);
+    await t.tween(1, FLIGHT_MS, EASE.linear);
     unsub(); it.x.jump(b.x); it.y.jump(b.y); it.lift.jump(0); it.rot.jump(0); it.z.jump(z1); it.inWell = i;
     onLand?.();
-    it.squash.jump(1); it.squash.to(0, SPRING.snap);
+    it.squash.jump(squashFor(m) / 0.05); it.squash.to(0, SPRING.snap);
   }
   impact(index) {
-    const wl = this.wells[index]; this.dent.x = wl.x; this.dent.y = wl.y;
+    const wl = this.wells[index]; this.dent.x = wl.xv.v; this.dent.y = wl.y;
     this.dent.amp.jump(0); this.dent.amp.to(0, { visualDuration: 0.36, bounce: 0.35 }, { velocity: -170 });
   }
   unfill() { /* the pebble leaves the well in back() */ }
@@ -195,7 +210,7 @@ export class GlEngine {
     it.scale.to(0.66, SPRING.settle); it.z.to(it.rz * 0.66, SPRING.settle);
     await Promise.all([it.x.to(b.x, SPRING.settle), it.y.to(b.y, SPRING.settle)]);
   }
-  closeImprint(index, open = false) { this.wells[index].open.to(open ? 1 : 0, SPRING.settle); }
+  closeImprint(index, open = false) { return this.wells[index].open.to(open ? 1 : 0, SPRING.settle); }
   async back(m, from, to) {
     const it = this.item(m), t = new Value(0, 'ratio'), z0 = it.z.v; it.inWell = -1;
     it.scale.to(1, SPRING.settle);

@@ -18,7 +18,7 @@
   } }</script>
   <style>
     html, body { height: 100%; overflow: hidden; overscroll-behavior: none; }
-    .stage { position: fixed; inset: 0; overflow: hidden; }
+    .stage { position: fixed; inset: 0; overflow: hidden; overflow: clip; }
     .atmos { position: absolute; inset: 0; z-index: 0; background: var(--bg); }
     .atmos canvas { position: absolute; inset: -4%; width: 108%; height: 108%; object-fit: cover; opacity: 0.55; }
     [data-theme="evening"] .atmos canvas { opacity: 0.28; }
@@ -27,7 +27,7 @@
       background: radial-gradient(120% 70% at calc(50% - var(--lx) * 45%) -10%, color-mix(in srgb, var(--light) 75%, transparent), transparent 70%);
     }
     .ui {
-      position: absolute; inset: 0; z-index: 2; max-width: 480px; margin: 0 auto; overflow: hidden;
+      position: absolute; inset: 0; z-index: 2; max-width: 480px; margin: 0 auto; overflow: hidden; overflow: clip; /* clip: no programmatic scroll either */
       display: grid; grid-template-rows: auto auto auto minmax(0, 1fr) auto; gap: 10px;
       padding: calc(env(safe-area-inset-top) + 10px) var(--gutter) calc(env(safe-area-inset-bottom) + 14px);
     }
@@ -41,8 +41,9 @@
     .daypart { display: inline-flex; gap: 4px; }
     .tray-panel { padding: 14px 14px 14px; position: relative; overflow: hidden; }
     .tray-head { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; margin: 0 4px 10px; }
-    .tray-head h1 { font: 650 20px/1.1 var(--font-display); margin: 0; }
-    .tray-head p { margin: 0; }
+    .tray-head h1 { font: 650 20px/1.1 var(--font-display); margin: 0; white-space: nowrap; }
+    .tray-head p { margin: 0; white-space: nowrap; font-size: 15px; color: var(--text-2); }
+    .tray-head p b { color: var(--text); font-weight: 750; font-variant-numeric: tabular-nums; }
     .tray {
       --tray: color-mix(in srgb, var(--card) 90%, var(--ink) 7%);
       background: var(--tray); border-radius: 18px; padding: 12px 10px; min-height: 86px;
@@ -77,17 +78,27 @@
     .pebble.is-sprite { background: none; box-shadow: none; }
     .pebble .sprite { position: absolute; inset: -7%; width: 114%; height: 114%; object-fit: contain; pointer-events: none; }
     .pebble.is-sprite svg { position: relative; color: rgb(21 35 30 / 0.55); }
+    /* Hybrid: Blender gives the satin body, CSS gives the live light (masked by the sprite's own alpha). */
+    .pebble.is-sprite::before {
+      content: ""; position: absolute; inset: -7%; pointer-events: none;
+      background:
+        radial-gradient(70% 55% at calc(50% - var(--lx) * 24%) calc(42% - var(--ly) * 20%), rgb(255 255 255 / 0.6), rgb(255 255 255 / 0) 70%),
+        radial-gradient(90% 80% at calc(50% + var(--lx) * 30%) calc(58% + var(--ly) * 26%), rgb(21 35 30 / 0.26), rgb(21 35 30 / 0) 70%);
+      -webkit-mask: var(--sprite) center / 100% 100% no-repeat; mask: var(--sprite) center / 100% 100% no-repeat;
+    }
     .band-row { position: relative; min-height: 44px; display: grid; align-items: center; }
     .band-row > * { grid-area: 1 / 1; }
     .undo {
       position: relative; z-index: 5; justify-self: center;
-      display: flex; align-items: center; gap: 12px; padding: 4px 4px 4px 16px; border-radius: var(--r-pill);
-      background: var(--text); color: var(--bg); box-shadow: 0 10px 30px -12px rgb(var(--shade) / 0.5); font-size: 15px;
-      max-width: 100%;
+      display: flex; align-items: center; gap: 4px; padding: 2px 2px 2px 14px; border-radius: var(--r-pill);
+      background: var(--card); color: var(--text-2); font-size: 14px; max-width: 100%;
+      box-shadow: 0 0 0 1px rgb(var(--shade) / 0.1), 0 8px 20px -12px rgb(var(--shade) / 0.45);
     }
+    .later { position: relative; }
+    .later .undo { position: absolute; right: 6px; top: 50%; transform: translateY(-50%); z-index: 5; }
     .undo:not([hidden]) ~ .note, .band-row:has(.undo:not([hidden])) .note { visibility: hidden; }
     .undo span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .undo button { background: color-mix(in srgb, var(--bg) 18%, transparent); color: var(--bg); border: 0; border-radius: var(--r-pill); min-height: 36px; padding: 0 14px; font-weight: 650; }
+    .undo button { background: transparent; color: var(--light-ink); border: 0; border-radius: var(--r-pill); min-height: 40px; padding: 0 12px; font-weight: 750; cursor: pointer; }
     .receipt {
       position: absolute; z-index: 6; left: var(--gutter); right: var(--gutter); bottom: calc(env(safe-area-inset-bottom) + 16px);
       max-width: 440px; margin: 0 auto; padding: 20px;

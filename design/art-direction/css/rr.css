@@ -25,13 +25,14 @@
   --light: var(--sun);
   --light-ink: var(--sun-ink);
   --placed: var(--moss);
+  --imprint-edge: var(--ink-3);   /* ~3.5:1 on the tray insert */
   --hollow: color-mix(in srgb, var(--ink) 7%, var(--bg));
   --shade: 21 35 30;        /* rgb triplet of the ink, for shadows */
 
   /* Light model: one global light. JS (feel.js) updates these from the time of day. */
   --lx: 0.55;               /* shadow direction, x */
   --ly: 0.85;               /* shadow direction, y */
-  --beam-skew: -12deg;
+  --beam-skew: 12deg;
 
   --font-display: "Bricolage Grotesque", ui-sans-serif, system-ui, sans-serif;
   --font-ui: "Figtree", ui-sans-serif, system-ui, -apple-system, sans-serif;
@@ -60,6 +61,7 @@
   --light: #F5BE55;
   --light-ink: #F5BE55;
   --placed: #94C3A5;
+  --imprint-edge: #7E8E86;
   --hollow: color-mix(in srgb, #000 28%, var(--bg));
   --shade: 0 0 0;
 }
@@ -173,7 +175,7 @@ button { font: inherit; color: inherit; }
   border-radius: var(--pr, 48% 52% 46% 54% / 52% 47% 53% 48%);
   background: var(--hollow);
   box-shadow:
-    inset 0 0 0 1.5px var(--edge),
+    inset 0 0 0 1.5px var(--imprint-edge),
     inset calc(var(--lx) * 3px) calc(var(--ly) * 4px) 7px rgb(var(--shade) / 0.3);
   display: grid; place-items: center;
   color: color-mix(in srgb, var(--text) 38%, transparent);

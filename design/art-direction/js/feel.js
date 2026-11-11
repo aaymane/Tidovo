@@ -99,7 +99,7 @@ export function currentDaypart() {
 export function setDaypart(name, persist = false) {
   const p = DAYPARTS[name]; if (!p) return;
   const root = document.documentElement.style;
-  root.setProperty('--lx', p.lx); root.setProperty('--ly', p.ly); root.setProperty('--beam-skew', p.skew + 'deg');
+  root.setProperty('--lx', p.lx); root.setProperty('--ly', p.ly); root.setProperty('--beam-skew', (p.lx * 22).toFixed(1) + 'deg');
   document.documentElement.dataset.theme = p.theme;
   document.documentElement.dataset.rrDaypart = name;
   if (persist) store.set('daypart', name);

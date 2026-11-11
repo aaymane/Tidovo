@@ -1,5 +1,9 @@
 """ROOMRESET — pebble sprites for the "Blender" material engine of the Placed study (T1.1).
 
+v2 (review fix): ambient light only (satin albedo + soft occlusion). The directional
+highlight and shade are added in CSS from the global light (--lx/--ly), so the sprite
+is right in the morning AND in the evening.
+
 Top-down orthographic renders with alpha, satin stone material, morning light from the
 upper-left (same direction as the CSS/WebGL engines' default). Shadows are NOT baked:
 the UI draws its own contact shadow so lift height can change it.
@@ -78,9 +82,9 @@ def rig(res=(300, 258)):
     world.use_nodes = True
     bg = next(n for n in world.node_tree.nodes if n.type == "BACKGROUND")
     bg.inputs[0].default_value = lin("#E9EEE8")
-    bg.inputs[1].default_value = 0.9
+    bg.inputs[1].default_value = 1.35
     sun = bpy.data.objects.new("Sun", bpy.data.lights.new("Sun", type="SUN"))
-    sun.data.energy = 3.2
+    sun.data.energy = 0.0  # v2: no baked direction
     sun.data.angle = math.radians(8)
     sun.data.color = (1.0, 0.94, 0.85)
     d = Vector((0.62, -0.78, -1.1)).normalized()  # light travels toward lower-right, down

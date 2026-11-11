@@ -29,3 +29,7 @@ export function flightPoint(a, b, t) {
   return { x: u * u * a.x + 2 * u * t * c.x + t * t * b.x, y: u * u * a.y + 2 * u * t * c.y + t * t * b.y };
 }
 export const liftCurve = (t) => Math.sin(Math.PI * Math.min(1, Math.max(0, t)));
+
+// Flight: linear time, parabolic height (max speed at contact), ease-out path. Impact = contact.
+export const FLIGHT_MS = 420;
+export const squashFor = (m) => 0.04 + ((pebbleSize(m) - 52) / 16) * 0.025;
