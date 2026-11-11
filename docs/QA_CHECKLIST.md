@@ -152,3 +152,11 @@
 | **iPhone 13 du fondateur** (iOS à préciser) | **À tester** avec `?perf=1` : c'est la mesure de référence |
 | Simulateur iPhone 15 Pro Max (iOS 17.2, WebKit) | ✅ Testé : Placed en 3D complet jusqu'au ticket ; dock, reveal et planche rendus |
 | Chrome 156 (Playwright, émulation iPhone 13 390×844, tactile) | ✅ Testé : console propre sur les 4 pages ; parcours, mouvement réduit, 0 rAF au repos ; capture du vol image par image |
+
+### Atmosphère vivante (T1.5)
+| ID | Exigence | Méthode |
+|---|---|---|
+| ATM-01 | Texte sur l'atmosphère ≥ 4,5:1 sur le pire pixel (voile de mise au point) | Capture avec le texte rendu transparent, `signalstats` YMIN/YMAX, puis calcul WCAG |
+| ATM-02 | Mouvement réduit : image fixe, aucune boucle | `window.rrAtmos.running === false` |
+| ATM-03 | Arrêt quand l'onglet est caché ; 30 i/s au repos | Revue de code et overlay `?perf=1` |
+| ATM-04 | p95 ≤ 16,7 ms pendant l'interaction sur iPhone 13 ; chauffe acceptable sur 10 min | Test du fondateur |

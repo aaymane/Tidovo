@@ -450,3 +450,8 @@ Confettis génériques · boucles ou dérives sans cause · lancer gratuit · pa
 7. **Three.js via CDN** : `three.module.min.js` importe le cœur **non minifié** (290 Ko gzip). On le redirige vers `three.core.min.js` dans l'import map (~194 Ko gzip au total).
 8. **Aucun élément flottant au-dessus d'une action** : le toast « Annuler » couvrait « Plus tard ». Il vit désormais dans la bande libre sous le plateau.
 9. **Une seule lumière**, vérifiée en matin, midi et soir sur les trois moteurs. Palette du jour proposée : « Air du matin » (ADR-019).
+10. **Vol de *Placed* = interpolation linéaire de 420 ms et parabole de hauteur** (ADR-021), et non plus un ressort : l'impact doit tomber, pas se garer.
+11. **Les empreintes se resserrent** quand l'une se ferme (FLIP via la propriété `translate`, qui ne gêne pas `transform`).
+12. **Le rai du dock penche avec les ombres** (`lx × 22°`). Le matin, la lumière vient de la gauche et le rai penche vers la droite.
+13. **Sprites hybrides** : la matière vient de Blender, la lumière du CSS. Les sprites restent justes à toute heure.
+14. **Atmosphère vivante, décision du fondateur (ADR-022)** : le plan 0 n'est plus une couleur unie. Ce sont des **galets et des lumières 3D floutés en profondeur de champ**, qui dérivent lentement, avec une parallaxe au doigt et à l'inclinaison. **Exception assumée** au principe « rien ne bouge sans cause », limitée au plan 0. Règles : 30 i/s au repos, arrêt quand l'onglet est caché, image fixe en mouvement réduit, **voile de mise au point** derrière tout texte posé sur l'atmosphère (≥ 4,5:1 mesuré).

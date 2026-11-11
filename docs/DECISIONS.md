@@ -221,3 +221,31 @@
 - **Safari réel** : simulateur iPhone 15 Pro Max (iOS 17.2, WebKit) ouvert par le fondateur. Le parcours *Placed* complet a été vérifié jusqu'au ticket final.
 - **Réseau local** : servir sur `0.0.0.0` (pour l'iPhone) a été **refusé par le classifieur de sécurité**. Le fondateur lance lui-même cette commande (README du prototype).
 - **Comptes** : le fondateur dispose d'un **compte Apple Developer** et d'un **iPhone 13**. La voie native passera par EAS (builds cloud) et TestFlight (P12), malgré Xcode 15.2.
+
+## ADR-021 — Impact réel et sprites hybrides (deuxième revue `motion-director`)
+- **Date** : 2026-11-11 · **Statut** : Acceptée (amende ADR-018 et MOTION_SYSTEM §5)
+- **Contexte** : le vol utilisait un ressort critique (`flight`). Le contact arrivait vers 0,71 s, après ~200 ms de lente approche : le galet « se garait », il ne tombait pas. Par ailleurs, les sprites Blender figeaient la lumière du matin.
+- **Décision** :
+  1. **Vol** : temps **linéaire de 420 ms** (`FLIGHT_MS`), hauteur en parabole `4τ(1−τ)` (vitesse maximale au contact), trajet en ease-out. `onLand` est déclenché **au contact** ; la carte suivante arrive à `onLand − 60 ms` ; l'écrasement est proportionnel à la taille du galet. Les ressorts restent utilisés pour tout le reste (retour, réorganisations, annulation).
+  2. **Plan** : une empreinte refermée par « Plus tard » est masquée, les autres glissent à leur place (FLIP avec la propriété `translate`), et les galets placés ainsi que les puits 3D suivent. Compteur : « placées sur (N − plus tard) ».
+  3. **Sprites hybrides** : Blender rend l'albédo satiné **sans lumière directionnelle** ; le reflet et l'ombrage viennent du CSS (`--lx`/`--ly`), masqués par la silhouette du sprite. Ils sont justes à toute heure.
+  4. **Un seul soleil** : l'inclinaison du rai du dock vaut `lx × 22°`, dans le même sens que les ombres.
+- **Conséquences** : le token `flight` devient une interpolation (MOTION_SYSTEM §15) ; le moteur recommandé par la revue est le DOM (CSS ou hybride), **à confirmer au doigt sur iPhone 13**.
+
+## ADR-022 — Atmosphère vivante (plan 0) : arrière-plan animé de formes 3D floutées
+- **Date** : 2026-11-11 · **Statut** : Proposée (choix du fondateur après test sur iPhone 13)
+- **Contexte** : le fondateur refuse le fond uni : « je veux surtout un arrière-plan animé, et surtout les trucs 3D floutés ». C'est sa décision de produit. Elle **amende** le principe « rien ne bouge sans cause » **pour le plan 0 seulement** ; la table interactive reste calme.
+- **Décision** :
+  - 12 galets et orbes de lumière sur trois profondeurs, en **profondeur de champ** (flou selon la distance au plan de netteté) ;
+  - relief éclairé par la **lumière globale**, dérive lente (périodes de 18 à 46 s), parallaxe au doigt et à l'inclinaison (sur autorisation iOS) ;
+  - **voile de mise au point** derrière le texte, qui garantit la lisibilité ;
+  - **règles d'énergie** : 30 i/s au repos, 60 i/s pendant l'interaction, arrêt quand l'onglet est caché, image fixe en mouvement réduit.
+- **Deux approches comparées** à scène identique (`study-atmosphere.html?atmos=gl|dom|flat`) :
+
+  | Approche | Rendu | Poids (gzip) | Mesure Chrome headless |
+  |---|---|---|---|
+  | **A — shader** (WebGL 1, un seul appel de dessin, demi-résolution) | Le plus lumineux et vivant : relief, reflets, flaque de lumière, grain | ≈ 6 Ko, sans bibliothèque ni image | p95 16,7 ms ; un pic isolé à 233 ms au matin |
+  | **B — sprites** (Blender + flou CSS statique + `transform`) | Plus photographique et calme | ≈ 4 Ko + 16 Ko de sprites | p95 16,7 ms |
+
+- **Recommandation provisoire : A (shader)**, la plus fidèle à la demande (3D, lumineuse, vivante) et la plus légère. **À confirmer sur iPhone 13** : chauffe et batterie sur 10 minutes, p95 avec `?perf=1`.
+- **Conséquences** : en production, le module d'atmosphère sera partagé par tous les écrans (Accueil, Mission, Reveal), avec une intensité par écran. Pendant une mission, l'atmosphère sera plus discrète.

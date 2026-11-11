@@ -35,6 +35,7 @@ Ajoutez `?perf=1` à n'importe quelle étude pour afficher les mesures en direct
 | `index.html` | Glisser le galet dans son empreinte ; Matin, Midi, Soir ; palette Air ou Lin | La matière, la lumière, la palette |
 | `study-placed.html` | « Fait », swipe vers le haut ou le bas, « Plus tard », « Annuler » ; **comparer CSS, Blender et 3D** | Quel moteur donne le meilleur ressenti ? |
 | `study-dock.html` | Toucher un onglet, **balayer le dock au pouce**, toucher le galet Reset | Le rai de soleil, le berceau, le viseur |
+| `study-atmosphere.html` | Bouger le doigt, activer « Inclinaison » ; comparer Shader, Sprites et Uni ; Matin ou Soir | Arrière-plan vivant en 3D floutée : beauté, lisibilité, chauffe |
 | `study-reveal.html` | Laisser la mise au point se faire, puis glisser la lumière n'importe où sur la photo | L'émotion, la lisibilité, la couture cachée |
 
 Le ⚙︎ de chaque page ouvre les réglages : son, vibrations (Android), **haptique iOS expérimentale** (iOS 18+, à essayer sur votre iPhone 13), mouvement calme, mesures.

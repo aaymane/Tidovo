@@ -77,7 +77,7 @@
     - vérifié dans Safari iOS 17.2 (simulateur, parcours *Placed* complet jusqu'au ticket) ;
     - **reste : test sur l'iPhone 13 du fondateur, avec `?perf=1`**.
   - [x] Variantes en mouvement réduit présentes et vérifiées (Playwright `reducedMotion`, moteur au repos à 120 ms).
-  - [ ] Revue critique `motion-director` sur captures réelles, et défaut principal corrigé (en cours, voir PROGRESS).
+  - [x] Revue critique `motion-director` sur captures réelles : **ses 6 points sont corrigés** et vérifiés (2026-11-11 : tests et captures, voir PROGRESS §8).
   - [ ] Le fondateur choisit le moteur (ADR-018), la palette (ADR-019) et la forme ; ADR-015 et ADR-016 passent en « Acceptée » ou sont amendées.
 - **Outils** : skills `frontend-design`, `cinematic-ui`, `visual-qa` ; simulateur iOS ; FFmpeg pour l'analyse image par image.
 
@@ -102,13 +102,19 @@
 ---
 
 #### T1.5 — Atmosphère vivante : arrière-plan animé et formes 3D floutées
-`P0` · `M` · `M1★` · ⬜ · Dépend de : T1.1 (corrections de la revue appliquées)
+`P0` · `M` · `M1★` · 🔍 En revue (livrée le 2026-11-11) · Dépend de : T1.1 (corrections de la revue appliquées)
 - **Description** : demande explicite du fondateur, « pas de simple couleur ». Le plan 0 devient un arrière-plan **animé, avec des galets et des orbes de lumière en 3D floutés** (profondeur de champ, lueurs, grain), qui dérivent lentement et réagissent au doigt ou à l'inclinaison.
 - **Comparaison** de deux approches, à disposition identique :
   - (A) shader WebGL plein écran, en demi-résolution ;
   - (B) sprites Blender floutés en CSS statique, animés en `transform`.
 - **Livrable** : `design/art-direction/study-atmosphere.html` (nouveaux fichiers uniquement), derrière un écran représentatif : carte de mission et dock.
-- **Critères** : [ ] lisibilité du texte ≥ 4,5:1 sur le pire cadre · [ ] pause hors écran, en arrière-plan et en mouvement réduit (image fixe) · [ ] p95 mesuré sur iPhone 13 · [ ] choix d'approche consigné (ADR) · [ ] validation du fondateur.
+- **Critères**
+  - [x] Lisibilité ≥ 4,5:1 sur le pire pixel derrière le texte, grâce au voile de mise au point. Mesuré sur une image : 8,4 / 8,8 / 4,8 / 6,1:1 (shader matin, sprites matin, shader soir, sprites soir).
+  - [x] Mouvement réduit : image fixe, boucle arrêtée (vérifié).
+  - [~] Pause quand l'onglet est caché : implémentée (`visibilitychange`), non testée automatiquement.
+  - [ ] p95 mesuré sur iPhone 13 (fondateur).
+  - [x] Comparaison consignée (ADR-022).
+  - [ ] Validation du fondateur.
 
 ## P2 — Spike IA : valider la valeur avant de construire
 

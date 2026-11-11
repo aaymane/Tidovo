@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#E9EEE8">
+  <link rel="icon" href="data:,">
+  <title>Atmosphère vivante — étude ROOMRESET</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,400..800&family=Figtree:wght@400..800&display=swap" media="print" onload="this.media='all'">
+  <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,400..800&family=Figtree:wght@400..800&display=swap"></noscript>
+  <link rel="stylesheet" href="css/rr.css">
+  <style>
+    html, body { height: 100%; overflow: hidden; overscroll-behavior: none; }
+    body { touch-action: none; }
+    .layer { position: fixed; inset: 0; z-index: 0; }
+    #atmosGl { width: 100%; height: 100%; display: none; }
+    [data-atmos="gl"] #atmosGl { display: block; }
+    #atmosDom { display: none; overflow: hidden; }
+    #atmosDom.is-on { display: block; background:
+      radial-gradient(90% 60% at calc(50% - var(--lx) * 45%) -5%, rgb(255 227 166 / 0.55), transparent 70%),
+      linear-gradient(to bottom, #EEF2EC, #DCE5DD); }
+    [data-theme="evening"] #atmosDom.is-on { background:
+      radial-gradient(90% 60% at calc(50% - var(--lx) * 45%) -5%, rgb(201 143 51 / 0.45), transparent 70%),
+      linear-gradient(to bottom, #16251F, #0B1411); }
+    .aorb { position: absolute; left: 0; top: 0; will-change: transform; pointer-events: none; }
+    .aorb img { width: 100%; height: 100%; object-fit: contain; display: block; }
+    .aorb:not(.is-light)::before {
+      content: ""; position: absolute; inset: 0;
+      background:
+        radial-gradient(70% 55% at calc(50% - var(--lx) * 24%) calc(42% - var(--ly) * 20%), rgb(255 255 255 / 0.55), rgb(255 255 255 / 0) 70%),
+        radial-gradient(90% 80% at calc(50% + var(--lx) * 30%) calc(58% + var(--ly) * 26%), rgb(21 35 30 / 0.24), rgb(21 35 30 / 0) 70%);
+      -webkit-mask: var(--sprite) center / 100% 100% no-repeat; mask: var(--sprite) center / 100% 100% no-repeat;
+    }
+    .aorb.is-light { border-radius: 50%; background: radial-gradient(closest-side, var(--glow), color-mix(in srgb, var(--glow) 0%, transparent)); }
+
+    .ui {
+      position: relative; z-index: 2; max-width: 480px; margin: 0 auto; height: 100%;
+      display: grid; grid-template-rows: auto 1fr auto; gap: 14px;
+      padding: calc(env(safe-area-inset-top) + 10px) var(--gutter) calc(env(safe-area-inset-bottom) + 104px);
+    }
+    .tools { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+    .seg { display: inline-flex; background: var(--card); border-radius: var(--r-pill); padding: 4px; box-shadow: 0 0 0 1px rgb(var(--shade) / 0.1); }
+    .seg button { appearance: none; border: 0; background: transparent; min-height: 36px; padding: 0 12px; border-radius: var(--r-pill); font: 600 14px/1 var(--font-ui); color: var(--text-2); cursor: pointer; }
+    .seg button[aria-checked="true"], .seg button[aria-pressed="true"] { background: var(--text); color: var(--bg); }
+    .hero { align-self: end; display: grid; gap: 14px; }
+    #greeting { font-size: clamp(56px, 18vw, 96px); margin: 0; }
+    /* Focus veil: the depth of field steps aside behind text (static, no cost, both engines). */
+    .hero-text { position: relative; isolation: isolate; display: grid; gap: 10px; }
+    .hero-text::before {
+      content: ""; position: absolute; inset: -36px -44px -30px -36px; z-index: -1; pointer-events: none;
+      background: radial-gradient(closest-side, color-mix(in srgb, var(--bg) 86%, transparent) 62%, color-mix(in srgb, var(--bg) 0%, transparent));
+    }
+    [data-atmos="flat"] .hero-text::before { display: none; }
+    .lede { margin: 0; font-size: 19px; line-height: 1.35; color: var(--text); max-width: 22ch; font-weight: 500; }
+    .mission { display: grid; grid-template-columns: auto 1fr; gap: 14px; align-items: center; padding: 16px; }
+    .mission .pebble-wrap { position: relative; transform: rotate(-8deg); }
+    .mission h2 { font: 650 20px/1.15 var(--font-display); margin: 0 0 2px; }
+    .mission p { margin: 0; color: var(--text-2); font-size: 15px; }
+    .mission .btn { grid-column: 1 / -1; }
+    .world { padding: 14px 16px; display: flex; justify-content: space-between; align-items: center; gap: 12px; font-size: 15px; }
+    .world b { font-family: var(--font-display); font-size: 18px; }
+    .foot { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+    .foot p { margin: 0; font-size: 13px; color: var(--text-2); }
+    .dock { position: fixed; z-index: 3; left: 16px; right: 16px; bottom: calc(env(safe-area-inset-bottom) + 12px); max-width: 448px; margin: 0 auto;
+      height: 70px; border-radius: 26px; display: grid; grid-template-columns: 1fr 1fr 84px 1fr 1fr; align-items: center; text-align: center;
+      background: color-mix(in srgb, var(--card) 72%, transparent); -webkit-backdrop-filter: blur(18px) saturate(1.25); backdrop-filter: blur(18px) saturate(1.25);
+      box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.7), 0 0 0 1px rgb(var(--shade) / 0.08), 0 14px 34px -14px rgb(var(--shade) / 0.45);
+      font: 600 12px/1 var(--font-ui); color: var(--text-2); }
+    .dock .on { color: var(--light-ink); }
+    .dock i { width: 58px; height: 50px; margin: -30px auto 0; border-radius: 49% 51% 46% 54% / 54% 47% 53% 46%; display: block;
+      background: radial-gradient(110% 85% at calc(50% - var(--lx) * 26%) calc(40% - var(--ly) * 22%), rgb(255 255 255 / 0.7), rgb(255 255 255 / 0) 58%), radial-gradient(130% 120% at 50% 45%, var(--light), color-mix(in srgb, var(--light) 70%, var(--sun-ink)));
+      box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--sun-ink) 70%, transparent), calc(var(--lx) * 3px) calc(var(--ly) * 6px) 12px -3px rgb(var(--shade) / 0.45); }
+  </style>
+</head>
+<body data-atmos="gl">
+  <canvas id="atmosGl" class="layer" aria-hidden="true"></canvas>
+  <div id="atmosDom" class="layer" aria-hidden="true"></div>
+  <main class="ui">
+    <div class="tools" id="tools">
+      <div class="seg" role="radiogroup" aria-label="Rendu de l’atmosphère">
+        <button type="button" role="radio" data-atmos-btn="gl" aria-checked="true">Shader</button>
+        <button type="button" role="radio" data-atmos-btn="dom" aria-checked="false">Sprites</button>
+        <button type="button" role="radio" data-atmos-btn="flat" aria-checked="false">Uni</button>
+      </div>
+      <div class="seg" role="group" aria-label="Lumière">
+        <button type="button" data-daypart="morning" aria-pressed="false" aria-label="Lumière du matin">☀︎</button>
+        <button type="button" data-daypart="evening" aria-pressed="false" aria-label="Lumière du soir">☾</button>
+      </div>
+    </div>
+    <section class="hero" aria-label="Accueil">
+      <div class="hero-text">
+        <h1 class="display" id="greeting">Bonjour.</h1>
+        <p class="lede">Votre micro-reset du jour : trois surfaces, quatre minutes.</p>
+      </div>
+      <article class="mission card">
+        <div class="pebble-wrap" style="--size:58px;--tint:#EBCB86" aria-hidden="true"><div class="pebble-shadow"></div><div class="pebble"></div></div>
+        <div><h2>Table de nuit, bureau, lit</h2><p>4 min, rien de plus.</p></div>
+        <button class="btn btn-primary btn-block" type="button">Commencer</button>
+      </article>
+      <div class="world card"><span>Votre monde</span><b>12 tronçons de chemin</b></div>
+      <div class="foot"><p id="atmosNote"></p><button class="btn btn-quiet btn-small" id="tiltBtn" type="button" aria-pressed="false">Inclinaison</button></div>
+    </section>
+  </main>
+  <nav class="dock" aria-label="Navigation (maquette)"><span class="on">Accueil</span><span>Monde</span><i aria-hidden="true"></i><span>Coach</span><span>Réglages</span></nav>
+  <script type="module" src="js/atmos.js"></script>
+</body>
+</html>

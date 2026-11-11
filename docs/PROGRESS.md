@@ -5,10 +5,10 @@
 ## 1. État courant
 | | |
 |---|---|
-| **Dernière mise à jour** | 2026-11-10, ~20 h 50 |
-| **Dernière étape livrée** | **T1.1** — Planche de direction artistique et étude de mouvement interactive (🔍 en revue). T0.1 a été validée et commitée par le fondateur. |
-| **Étape en cours** | Aucune : **en attente du test sur iPhone 13 et des choix du fondateur** (moteur, palette, forme) |
-| **Prochaine tâche** | **T2.1** — Spike IA : schéma, consignes et harnais (chemin critique ★ ; demande votre clé API et un budget). Alternative : T1.2, voix de marque. **Non commencée.** |
+| **Dernière mise à jour** | 2026-11-11 |
+| **Dernières étapes livrées** | **T1.1** : revue `motion-director` intégrée (impact réel, plan qui se resserre, annulation discrète, un seul soleil, sprites hybrides). **T1.5** : Atmosphère vivante, arrière-plan animé de formes 3D floutées, shader contre sprites. Les deux sont 🔍 en revue. |
+| **Étape en cours** | Aucune : **en attente des tests sur iPhone 13 et des choix du fondateur** (moteur des galets, palette, rendu de l'atmosphère) |
+| **Prochaine tâche** | **T2.1** — Spike IA : schéma, consignes et harnais (chemin critique ★ ; demande une clé API Anthropic et un petit budget, ≈ 1–3 $). **Non commencée.** |
 
 ## 2. Fichiers de T1.1
 **Nouveaux**
@@ -85,7 +85,11 @@
 - À commiter pour T1.1 : `design/` et `docs/`. Claude n'a exécuté aucune commande Git d'écriture.
 
 ## 8. Revue critique `motion-director` (captures réelles de T1.1)
-Reçue. **Corrections à faire en début de prochaine session (elles terminent T1.1)** :
+Reçue. **Les 6 corrections sont appliquées et vérifiées le 2026-11-11** :
+- tests : 3 moteurs, « 2 sur 4 », console propre, 0 rAF au repos ;
+- captures : plateau resserré, annulation à sa place, sprite hybride juste le soir, plateau 3D neutre avec liseré.
+
+Détail des corrections :
 1. **« Plus tard » laisse un trou dans le plateau.**
    - Passer l'empreinte en `hidden` à la fin du ressort, puis animer les empreintes restantes et les galets placés vers leur nouvelle place (FLIP, `SPRING.settle`), y compris les puits WebGL.
    - Compteur « x sur (N − plus tard) ».
@@ -109,3 +113,5 @@ Reçue. **Corrections à faire en début de prochaine session (elles terminent T
 |---|---|---|
 | 2026-11-10 | T0.1 | Audit, vision, direction v0.2, roadmap, ADR 001 à 017, mémoire du projet. Livrée, puis validée et commitée par le fondateur (`8cbda3a`). |
 | 2026-11-10 | T1.1 | Planche « Morning Clarity », 3 études, moteur *Placed* en 3 variantes (CSS, sprites Blender, Three.js), chambre et galets rendus dans Blender. Tests Chrome et Safari iOS ; 14 défauts trouvés et corrigés ; ADR 018 à 020. Livrée pour revue. **Arrêt : attente du test sur iPhone 13 et des choix du fondateur.** |
+| 2026-11-11 | T1.1 | 6 points de la revue `motion-director` corrigés et vérifiés ; ADR-021. |
+| 2026-11-11 | T1.5 | Atmosphère vivante, à la demande du fondateur : shader WebGL (~6 Ko) contre sprites Blender ; voile de mise au point (contraste ≥ 4,5:1 mesuré sur pixels) ; économie d'énergie ; ADR-022. Livrée pour revue. **Arrêt.** |
