@@ -119,7 +119,7 @@
 ## P2 — Spike IA : valider la valeur avant de construire
 
 #### T2.1 — Schéma de sortie, consignes v1 et harnais
-`P0` · `S` · `M1★` · ⬜ · Dépend de : T0.1 ; clé API placée par le fondateur dans `spikes/ai-scan/.env.local`
+`P0` · `S` · `M1★` · ⏸ Reportée par le fondateur le 2026-11-11 (« la clé API, pour après ») · Dépend de : T0.1 ; clé API placée par le fondateur dans `spikes/ai-scan/.env.local`
 - **Description** : dossier isolé `spikes/ai-scan/` avec son propre `package.json`.
   - Schéma Zod `ScanResult` :
     - **observations visibles**, chacune avec sa preuve ;
@@ -130,7 +130,7 @@
 - **Critères** : [ ] typecheck OK · [ ] les tests du schéma rejettent les sorties invalides · [ ] `.env.local` et `photos/` ignorés par Git (vérifié en lecture avec `git check-ignore`) · [ ] **aucun appel API sans accord du fondateur**.
 
 #### T2.2 — Benchmark sur photos réelles
-`P0` · `M` · `M1★` · ⬜ · Dépend de : T2.1 ; budget approuvé par le fondateur
+`P0` · `M` · `M1★` · ⏸ Reportée (avec T2.1) · Dépend de : T2.1 ; budget approuvé par le fondateur
 - **Description** :
   - 10 à 15 photos réelles fournies par le fondateur (sans personnes, avec le consentement des occupants), réduites à 1280 px.
   - Exécution avec `claude-opus-5-5` (effort `low` et `medium`). Comparaison avec Sonnet 5.5 ou Haiku 5.5 **uniquement si le fondateur l'autorise**.
@@ -144,14 +144,20 @@
 ## P3 — Creative Foundation
 
 #### T3.1 — Scaffold Next.js et outillage qualité
-`P0` · `M` · `M1★` · ⬜ · Dépend de : T1.1
+`P0` · `M` · `M1★` · 🔍 En revue (livrée le 2026-11-11, dans `web/`) · Dépend de : T1.1
 - **Description** :
   - Next.js 16 App Router, React 19, TS strict (`noUncheckedIndexedAccess`), Tailwind 4, ESLint, Prettier, Vitest, Playwright (`channel: 'chrome'`).
   - Scripts `dev`, `dev:lan`, `build`, `typecheck`, `lint`, `test`, `e2e`.
   - Arborescence `src/{app,core,ui,motion,features,server,i18n}` ; règle lint qui interdit React et Next dans `src/core`.
   - Polices auto-hébergées.
 - **Livrable** : une app vide qui compile.
-- **Critères** : [ ] `build`, `typecheck`, `lint` et `test` verts (sorties jointes) · [ ] page ouverte sur l'iPhone du fondateur via le réseau local · [ ] capture Playwright à 390 px · [ ] versions épinglées consignées · [ ] compatibilité de TypeScript 7 tranchée (ADR).
+- **Critères**
+  - [x] `build`, `typecheck`, `lint` et `test` verts (4 tests) ; `format:check` vert.
+  - [x] Règle de pureté de `src/core` prouvée par un fichier sonde.
+  - [x] E2E Playwright vert en émulation iPhone 13 : `lang="fr"`, police de marque, 0 erreur, 0 requête en échec ; capture à 390 px.
+  - [x] Build de production vérifié dans le Safari du simulateur iOS 17.2.
+  - [ ] Page ouverte sur l'iPhone du fondateur (`npm run dev:lan`, à lancer par lui).
+  - [x] Versions épinglées consignées ; TypeScript 7 tranché (ADR-023 : 6.0.3).
 
 #### T3.2 — Design tokens en code
 `P0` · `S` · `M1★` · ⬜ · Dépend de : T3.1

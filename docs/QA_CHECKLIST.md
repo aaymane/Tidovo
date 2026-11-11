@@ -160,3 +160,10 @@
 | ATM-02 | Mouvement réduit : image fixe, aucune boucle | `window.rrAtmos.running === false` |
 | ATM-03 | Arrêt quand l'onglet est caché ; 30 i/s au repos | Revue de code et overlay `?perf=1` |
 | ATM-04 | p95 ≤ 16,7 ms pendant l'interaction sur iPhone 13 ; chauffe acceptable sur 10 min | Test du fondateur |
+
+### Mesures de référence de T3.1 (2026-11-11)
+| ID | Résultat |
+|---|---|
+| PERF-05 | JS de premier chargement de `/` : **134 Ko** transférés (budget de 170 Ko) |
+| PERF-08 | Polices et CSS compris : total de 353 Ko. **Polices au-dessus du budget de 120 Ko** : sous-ensembles et axes à optimiser en T3.2 |
+| SEC-04 | `npm audit --omit=dev` : 0 ; 7 modérées en développement (`minimatch`) |

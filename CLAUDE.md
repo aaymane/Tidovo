@@ -74,3 +74,5 @@ Blender MCP et LottieFiles Creator MCP doivent être reconnectés manuellement a
 | `docs/QA_CHECKLIST.md` | Exigences vérifiables et définition de « terminé » |
 | `docs/TOOL_AUDIT.md` | Outils, MCP, skills et agents vérifiés |
 | `references/` | Médias de référence tiers : usage local uniquement, exclus de Git (voir `references/README.md`) |
+| `web/` | **Application Next.js**. Commandes : `cd web && npm run check` (types, lint, tests, format) et `npm run e2e` (Playwright). Voir `web/README.md` |
+| `design/art-direction/` | Prototypes et études T1.x (planche, Placed, dock, reveal, atmosphère) |

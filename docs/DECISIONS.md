@@ -249,3 +249,21 @@
 
 - **Recommandation provisoire : A (shader)**, la plus fidèle à la demande (3D, lumineuse, vivante) et la plus légère. **À confirmer sur iPhone 13** : chauffe et batterie sur 10 minutes, p95 avec `?perf=1`.
 - **Conséquences** : en production, le module d'atmosphère sera partagé par tous les écrans (Accueil, Mission, Reveal), avec une intensité par écran. Pendant une mission, l'atmosphère sera plus discrète.
+
+## ADR-023 — Socle de l'application (T3.1)
+- **Date** : 2026-11-11 · **Statut** : Acceptée (sauf remarque du fondateur)
+- **Emplacement** : l'application vit dans **`web/`**. La racine garde `docs/`, `design/` et `references/` ; un futur `mobile/` (Expo) et un paquet partagé pourront s'ajouter à côté. `create-next-app` refuse de toute façon un dossier non vide.
+- **Versions** (vérifiées sur npm le 2026-11-11) :
+  - next 16.4.6, react / react-dom 19.3.0 (épinglées par le gabarit), tailwindcss et @tailwindcss/turbopack 4.3.3, eslint 9 + eslint-config-next 16.4.6 ;
+  - **typescript 6.0.3** : **TypeScript 7.0.2 écarté**, car `typescript-eslint` 8.72 exige `typescript <6.1.0` (vérifié) ;
+  - @types/node **24.19.2**, aligné sur Node 24 : Vitest 5.1 exige `@types/node` 22 ou ≥ 24, et le gabarit fournissait la 20, d'où un conflit ERESOLVE corrigé proprement, sans `--force` ;
+  - vitest 5.1.0, @playwright/test 1.65.0, prettier 3.9.10.
+- **Gabarit Next 16.4** conservé : `cacheComponents`, `partialPrefetching`, chargeur Tailwind pour Turbopack, type global `LayoutProps`. Le fichier `web/AGENTS.md`, régénéré par `next dev`, est gardé.
+- **Qualité** : TypeScript strict + `noUncheckedIndexedAccess`, `noImplicitOverride`, `noFallthroughCasesInSwitch` ; ESLint `no-restricted-imports` sur `src/core` (prouvé par une sonde) ; Prettier ; Vitest ; Playwright avec le **Chrome installé** (émulation iPhone 13 tactile, serveur lié à 127.0.0.1).
+- **Polices** : Bricolage Grotesque (axes `opsz` et `wdth`) et Figtree, en `latin` et `latin-ext`, auto-hébergées par `next/font`.
+- **Mesures** :
+  - JS de premier chargement de `/` : **134 Ko transférés** (5 scripts), sous le budget de 170 Ko, avec environ 36 Ko de marge ;
+  - total de 353 Ko avec les polices et le CSS ; **les polices sont à optimiser en T3.2** (budget de 120 Ko).
+- **Sécurité** :
+  - `npm audit` sur les dépendances de production : **0 vulnérabilité** ;
+  - 7 vulnérabilités modérées dans l'outillage de développement (`minimatch` via ESLint), sans impact sur l'application livrée ; à revoir lors de la montée d'ESLint.

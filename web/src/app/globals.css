@@ -1,0 +1,26 @@
+@import "tailwindcss";
+
+/* Minimal brand base for the scaffold (T3.1). The full token system — palettes, evening
+   theme, global light, motion tokens — is T3.2, once the founder picks the palette (ADR-019). */
+@theme {
+  --font-display: var(--font-bricolage), ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-figtree), ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --color-air: #e9eee8;
+  --color-surface: #f7f9f5;
+  --color-ink: #15231e;
+  --color-ink-2: #4b5b54;
+  --color-sun: #f2b33d;
+}
+
+html {
+  background: var(--color-air);
+  color: var(--color-ink);
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  min-height: 100dvh;
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}

@@ -6,9 +6,10 @@
 | | |
 |---|---|
 | **Dernière mise à jour** | 2026-11-11 |
-| **Dernières étapes livrées** | **T1.1** : revue `motion-director` intégrée (impact réel, plan qui se resserre, annulation discrète, un seul soleil, sprites hybrides). **T1.5** : Atmosphère vivante, arrière-plan animé de formes 3D floutées, shader contre sprites. Les deux sont 🔍 en revue. |
-| **Étape en cours** | Aucune : **en attente des tests sur iPhone 13 et des choix du fondateur** (moteur des galets, palette, rendu de l'atmosphère) |
-| **Prochaine tâche** | **T2.1** — Spike IA : schéma, consignes et harnais (chemin critique ★ ; demande une clé API Anthropic et un petit budget, ≈ 1–3 $). **Non commencée.** |
+| **Dernière étape livrée** | **T3.1** — Socle Next.js dans `web/` (🔍 en revue). T1.1 et T1.5 : en revue (tests iPhone et choix du fondateur attendus). |
+| **Mis en pause** | P2, spike IA (T2.1 et T2.2) : reporté par le fondateur (« la clé API, pour après ») |
+| **Étape en cours** | Aucune : attente de la revue, du commit et du push |
+| **Prochaine tâche** | **T3.2** — Design tokens en code (palette, thème Soir, lumière globale, motion), polices optimisées sous 120 Ko. Elle bénéficiera de **votre choix de palette** (Air ou Lin), faute de quoi Air, la proposition, sera prise par défaut. **Non commencée.** |
 
 ## 2. Fichiers de T1.1
 **Nouveaux**
@@ -115,3 +116,6 @@ Détail des corrections :
 | 2026-11-10 | T1.1 | Planche « Morning Clarity », 3 études, moteur *Placed* en 3 variantes (CSS, sprites Blender, Three.js), chambre et galets rendus dans Blender. Tests Chrome et Safari iOS ; 14 défauts trouvés et corrigés ; ADR 018 à 020. Livrée pour revue. **Arrêt : attente du test sur iPhone 13 et des choix du fondateur.** |
 | 2026-11-11 | T1.1 | 6 points de la revue `motion-director` corrigés et vérifiés ; ADR-021. |
 | 2026-11-11 | T1.5 | Atmosphère vivante, à la demande du fondateur : shader WebGL (~6 Ko) contre sprites Blender ; voile de mise au point (contraste ≥ 4,5:1 mesuré sur pixels) ; économie d'énergie ; ADR-022. Livrée pour revue. **Arrêt.** |
+
+| 2026-11-11 | P2 | Spike IA mis en pause à la demande du fondateur. |
+| 2026-11-11 | T3.1 | Socle `web/` : Next 16.4.6, TypeScript 6.0.3 (7 incompatible avec typescript-eslint), Tailwind 4, ESLint avec règle de pureté de `src/core` (prouvée), Prettier, Vitest (4 tests), Playwright (Chrome, iPhone 13 ; E2E vert) ; Safari iOS vérifié ; premier chargement JS de 134 Ko ; ADR-023. Livrée pour revue. **Arrêt.** |
